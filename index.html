@@ -32,7 +32,6 @@
     .pf-social:hover { color: {{ inkColor }} !important; }
     .pf-float-wrap { position: absolute; inset: 0; }
     @media (max-width: 700px) {
-      .pf-float-wrap { transform: scale(1.3); transform-origin: center; }
       .pf-header { padding: 16px 20px !important; }
       .pf-nav-row { gap: 14px !important; }
       .pf-nav-link { font-size: 10px !important; letter-spacing: 0.06em !important; }
@@ -1625,10 +1624,15 @@ class Component extends DCLogic {
         const s = enc(sp.src);
         const mx = this.state.mouseX * sp.depth;
         const my = this.state.mouseY * sp.depth;
+        const isMobileW = typeof window !== 'undefined' && window.innerWidth <= 700;
+        const leftPct = parseFloat(sp.left), topPct = parseFloat(sp.top), wPct = parseFloat(sp.w);
+        const left = isMobileW ? (50 + (leftPct - 50) * 0.6) + '%' : sp.left;
+        const top = isMobileW ? (50 + (topPct - 50) * 0.75) + '%' : sp.top;
+        const w = isMobileW ? (wPct * 1.9) + '%' : sp.w;
         return {
           id: 'ft-' + i,
           wrapStyle: {
-            position: 'absolute', left: sp.left, top: sp.top, width: sp.w, aspectRatio: sp.ratio,
+            position: 'absolute', left, top, width: w, aspectRatio: sp.ratio,
             transform: 'translate(' + mx + 'px, ' + my + 'px) rotate(' + sp.rot + 'deg)',
             transition: 'transform 0.5s cubic-bezier(0.16,1,0.3,1)',
             willChange: 'transform',
