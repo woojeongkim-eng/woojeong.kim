@@ -30,11 +30,14 @@
     .pf-row:hover .pf-row-num { color: {{ inkColor }}; }
     .pf-nav-link:hover { opacity: 1 !important; }
     .pf-social:hover { color: {{ inkColor }} !important; }
+    .pf-float-wrap { position: absolute; inset: 0; }
     @media (max-width: 700px) {
-      .pf-float-tile { display: none !important; }
+      .pf-float-wrap { transform: scale(0.55); transform-origin: center; }
       .pf-header { padding: 16px 20px !important; }
       .pf-nav-row { gap: 14px !important; }
       .pf-nav-link { font-size: 10px !important; letter-spacing: 0.06em !important; }
+      .pf-page { padding: 32px 20px 64px !important; }
+      .pf-big-title { font-size: 28px !important; overflow-wrap: break-word !important; }
     }
   </style>
 </helmet>
@@ -102,9 +105,11 @@
   <!-- HOME PAGE -->
   <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
     <main key="home" style="{{ homePageStyle }}" onMouseMove="{{ onHomeMouseMove }}">
-      <sc-for list="{{ floatThumbs }}" as="th" hint-placeholder-count="35">
-        <div class="pf-float-tile" style="{{ th.wrapStyle }}">{{ th.el }}</div>
-      </sc-for>
+      <div class="pf-float-wrap">
+        <sc-for list="{{ floatThumbs }}" as="th" hint-placeholder-count="35">
+          <div class="pf-float-tile" style="{{ th.wrapStyle }}">{{ th.el }}</div>
+        </sc-for>
+      </div>
 
       <div style="{{ homeCenterStyle }}">
         <span style="{{ homeBrandStyle }}">{{ myName }}</span>
@@ -120,9 +125,9 @@
 
   <!-- PROJECT LIST PAGE -->
   <sc-if value="{{ isProjectList }}" hint-placeholder-val="{{ true }}">
-    <main key="project" style="{{ projectPageStyle }}">
+    <main key="project" class="pf-page" style="{{ projectPageStyle }}">
       <div style="{{ projectHeadRowStyle }}">
-        <h1 style="{{ h1Style }}">PROJECT</h1>
+        <h1 class="pf-big-title" style="{{ h1Style }}">PROJECT</h1>
         <div style="{{ tabRowStyle }}">
           <sc-for list="{{ companyTabs }}" as="tab" hint-placeholder-count="2">
             <span style="{{ tab.style }}" onClick="{{ tab.onClick }}">{{ tab.label }}</span>
@@ -146,7 +151,7 @@
 
   <!-- PROJECT DETAIL PAGE -->
   <sc-if value="{{ isProjectDetail }}" hint-placeholder-val="{{ false }}">
-    <main key="project-detail" style="{{ projectDetailPageStyle }}">
+    <main key="project-detail" class="pf-page" style="{{ projectDetailPageStyle }}">
       <a href="#" class="pf-social" style="{{ backLinkStyle }}" onClick="{{ closeProjectDetail }}">← BACK TO PROJECT</a>
       <div style="{{ projectDetailHeroStyle }}">
         {{ heroImgEl }}
@@ -155,7 +160,7 @@
         </sc-if>
       </div>
       <div style="{{ projectDetailMetaRowStyle }}">
-        <h1 style="{{ projectDetailTitleStyle }}">{{ projectDetail.title }}</h1>
+        <h1 class="pf-big-title" style="{{ projectDetailTitleStyle }}">{{ projectDetail.title }}</h1>
         <span style="{{ projectDetailTagStyle }}">{{ projectDetail.company }} — {{ projectDetail.role }}</span>
       </div>
       <p style="{{ projectDetailBodyStyle }}">{{ projectDetail.description }}</p>
@@ -179,7 +184,7 @@
 
   <!-- PROFILE PAGE (about + career) -->
   <sc-if value="{{ isProfileMain }}" hint-placeholder-val="{{ true }}">
-    <main key="profile" style="{{ profilePageStyle }}">
+    <main key="profile" class="pf-page" style="{{ profilePageStyle }}">
       <div style="{{ aboutHeroStyle }}">
         <span style="{{ aboutEyebrowCenterStyle }}">ABOUT</span>
         <h1 style="{{ aboutHeroTitleStyle }}">전략적 사고와 크리에이티브 감각으로,<br>브랜드를 성장시킵니다.</h1>
@@ -224,10 +229,10 @@
 
   <!-- ARCHIVE LIST PAGE -->
   <sc-if value="{{ isArchiveList }}" hint-placeholder-val="{{ false }}">
-    <main key="archive" style="{{ archivePageStyle }}">
+    <main key="archive" class="pf-page" style="{{ archivePageStyle }}">
       <div style="{{ archiveHeaderStyle }}">
         <div style="{{ archiveTitleRowStyle }}">
-          <span style="{{ archiveTitleStyle }}">Archive</span>
+          <span class="pf-big-title" style="{{ archiveTitleStyle }}">Archive</span>
           <div style="{{ archiveCategoryTabRowStyle }}">
             <sc-for list="{{ archiveCategoryTabs }}" as="tab" hint-placeholder-count="3">
               <button style="{{ tab.style }}" onClick="{{ tab.onClick }}">{{ tab.label }}</button>
@@ -257,10 +262,10 @@
 
   <!-- ARCHIVE DETAIL PAGE -->
   <sc-if value="{{ isArchiveDetail }}" hint-placeholder-val="{{ false }}">
-    <main key="archive-detail" style="{{ archivePageStyle }}">
+    <main key="archive-detail" class="pf-page" style="{{ archivePageStyle }}">
       <div style="{{ archiveDetailHeaderStyle }}">
         <a href="#" class="pf-social" style="{{ backLinkStyle }}" onClick="{{ closeArchiveFolder }}">← BACK TO ARCHIVE</a>
-        <span style="{{ archiveTitleStyle }}">{{ activeFolder.title }}</span>
+        <span class="pf-big-title" style="{{ archiveTitleStyle }}">{{ activeFolder.title }}</span>
         <span style="{{ archiveSubStyle }}">{{ activeFolder.subLabel }}</span>
         <sc-if value="{{ hasFolderDescription }}" hint-placeholder-val="{{ false }}">
           <p style="{{ archiveDetailDescStyle }}">{{ activeFolder.description }}</p>
@@ -287,10 +292,10 @@
 
   <!-- CAREER DETAIL PAGE -->
   <sc-if value="{{ isCareerDetail }}" hint-placeholder-val="{{ false }}">
-    <main key="career-detail" style="{{ careerDetailPageStyle }}">
+    <main key="career-detail" class="pf-page" style="{{ careerDetailPageStyle }}">
       <a href="#" class="pf-social" style="{{ backLinkStyle }}" onClick="{{ closeCareerDetail }}">← BACK TO PROFILE</a>
       <div style="{{ careerDetailHeaderStyle }}">
-        <span style="{{ careerDetailCompanyStyle }}">{{ careerDetail.company }}</span>
+        <span class="pf-big-title" style="{{ careerDetailCompanyStyle }}">{{ careerDetail.company }}</span>
         <span style="{{ careerDetailTitleStyle }}">{{ careerDetail.title }}</span>
       </div>
       <div style="{{ overviewBoxStyle }}">
@@ -316,7 +321,7 @@
 
   <!-- CONTACT PAGE (disabled) -->
   <sc-if value="{{ false }}" hint-placeholder-val="{{ false }}">
-    <main key="contact" style="{{ contactPageStyle }}">
+    <main key="contact" class="pf-page" style="{{ contactPageStyle }}">
       <div style="{{ contactCornerStyle }}">
         <sc-for list="{{ contactRows }}" as="row" hint-placeholder-count="3">
           <a href="{{ row.href }}" class="pf-social" style="{{ contactRowStyle }}">
