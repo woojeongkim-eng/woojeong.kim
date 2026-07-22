@@ -1,0 +1,1732 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="true">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&amp;family=Archivo:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { -webkit-font-smoothing: antialiased; }
+    @keyframes pf-fade-up {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pf-fade {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes pf-float-0 { 0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); } 50% { transform: translateY(-16px) rotate(var(--r, 0deg)); } }
+    @keyframes pf-float-1 { 0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); } 50% { transform: translateY(14px) rotate(var(--r, 0deg)); } }
+    @keyframes pf-float-2 { 0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); } 50% { transform: translateY(-10px) translateX(8px) rotate(var(--r, 0deg)); } }
+    .pf-row:hover .pf-row-title { color: {{ inkColor }}; transform: translateX(6px); }
+    .pf-row:hover .pf-row-num { color: {{ inkColor }}; }
+    .pf-nav-link:hover { opacity: 1 !important; }
+    .pf-social:hover { color: {{ inkColor }} !important; }
+  </style>
+</helmet>
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 80 56" xmlns="http://www.w3.org/2000/svg">
+    <rect width="80" height="56" fill="#efeae1"/>
+    <text x="40" y="33" font-size="16" text-anchor="middle" fill="#3a3630" font-family="Georgia">KW</text>
+  </svg>
+</template>
+
+<div style="{{ rootStyle }}">
+
+  <sc-if value="{{ showIntro }}" hint-placeholder-val="{{ true }}">
+    <div style="{{ introOverlayStyle }}" onClick="{{ enterSite }}">
+      <span style="{{ introNameStyle }}">Kim Woojeong Archive</span>
+      <span style="{{ introEnterStyle }}">ENTER →</span>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ showProjectLock }}" hint-placeholder-val="{{ false }}">
+    <div style="{{ lockOverlayStyle }}">
+      <div style="{{ lockBoxStyle }}">
+        <span style="{{ lockLabelStyle }}">ENTER CODE</span>
+        <input type="password" inputMode="numeric" value="{{ passcodeInput }}" onChange="{{ onPasscodeChange }}" onKeyDown="{{ onPasscodeKeyDown }}" style="{{ lockInputStyle }}" autoFocus="{{ true }}" />
+        <sc-if value="{{ passcodeError }}" hint-placeholder-val="{{ false }}">
+          <span style="{{ lockErrorStyle }}">코드가 올바르지 않습니다</span>
+        </sc-if>
+        <div style="{{ lockButtonRowStyle }}">
+          <button style="{{ lockSubmitStyle }}" onClick="{{ submitPasscode }}">UNLOCK</button>
+          <button style="{{ lockCancelStyle }}" onClick="{{ cancelPasscode }}">CANCEL</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ showCareerLock }}" hint-placeholder-val="{{ false }}">
+    <div style="{{ lockOverlayStyle }}">
+      <div style="{{ lockBoxStyle }}">
+        <span style="{{ lockLabelStyle }}">ENTER CODE</span>
+        <input type="password" inputMode="numeric" value="{{ careerPasscodeInput }}" onChange="{{ onCareerPasscodeChange }}" onKeyDown="{{ onCareerPasscodeKeyDown }}" style="{{ lockInputStyle }}" autoFocus="{{ true }}" />
+        <sc-if value="{{ careerPasscodeError }}" hint-placeholder-val="{{ false }}">
+          <span style="{{ lockErrorStyle }}">코드가 올바르지 않습니다</span>
+        </sc-if>
+        <div style="{{ lockButtonRowStyle }}">
+          <button style="{{ lockSubmitStyle }}" onClick="{{ submitCareerPasscode }}">UNLOCK</button>
+          <button style="{{ lockCancelStyle }}" onClick="{{ cancelCareerPasscode }}">CANCEL</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- NAV -->
+  <sc-if value="{{ isNotHome }}" hint-placeholder-val="{{ false }}">
+    <header style="{{ headerStyle }}">
+      <div style="{{ brandMarkStyle }}" onClick="{{ goHomeClick }}">Portfolio</div>
+      <nav style="{{ navRowStyle }}">
+        <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="4">
+          <a href="#" onClick="{{ item.onClick }}" class="pf-nav-link" style="{{ item.style }}">{{ item.label }}</a>
+        </sc-for>
+      </nav>
+    </header>
+  </sc-if>
+
+
+  <!-- HOME PAGE -->
+  <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+    <main key="home" style="{{ homePageStyle }}" onMouseMove="{{ onHomeMouseMove }}">
+      <sc-for list="{{ floatThumbs }}" as="th" hint-placeholder-count="35">
+        <div style="{{ th.wrapStyle }}">{{ th.el }}</div>
+      </sc-for>
+
+      <div style="{{ homeCenterStyle }}">
+        <span style="{{ homeBrandStyle }}">{{ myName }}</span>
+        <div style="{{ homeBottomNavStyle }}">
+          <span>THE</span>
+          <a href="#" class="pf-social" style="{{ homeBottomLinkStyle }}" onClick="{{ enterArchive }}">ARCHIVE</a>
+          <span>AND</span>
+          <a href="#" class="pf-social" style="{{ homeBottomLinkStyle }}" onClick="{{ enterAbout }}">ABOUT ME</a>
+        </div>
+      </div>
+    </main>
+  </sc-if>
+
+  <!-- PROJECT LIST PAGE -->
+  <sc-if value="{{ isProjectList }}" hint-placeholder-val="{{ true }}">
+    <main key="project" style="{{ projectPageStyle }}">
+      <div style="{{ projectHeadRowStyle }}">
+        <h1 style="{{ h1Style }}">PROJECT</h1>
+        <div style="{{ tabRowStyle }}">
+          <sc-for list="{{ companyTabs }}" as="tab" hint-placeholder-count="2">
+            <span style="{{ tab.style }}" onClick="{{ tab.onClick }}">{{ tab.label }}</span>
+          </sc-for>
+        </div>
+      </div>
+      <div style="{{ scrollRowStyle }}">
+        <sc-for list="{{ activeTabProjects }}" as="proj" hint-placeholder-count="6">
+          <div style="{{ cardStyle }}" onClick="{{ proj.onClick }}">
+            <div style="{{ cardImgStyle }}">{{ proj.cardImgEl }}</div>
+            <div style="{{ cardCaptionStyle }}">
+              <span style="{{ cardNumStyle }}">{{ proj.num }}</span>
+              <span style="{{ cardTitleStyle }}">{{ proj.title }}</span>
+              <span style="{{ cardRoleStyle }}">{{ proj.role }}</span>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </main>
+  </sc-if>
+
+  <!-- PROJECT DETAIL PAGE -->
+  <sc-if value="{{ isProjectDetail }}" hint-placeholder-val="{{ false }}">
+    <main key="project-detail" style="{{ projectDetailPageStyle }}">
+      <a href="#" class="pf-social" style="{{ backLinkStyle }}" onClick="{{ closeProjectDetail }}">← BACK TO PROJECT</a>
+      <div style="{{ projectDetailHeroStyle }}">
+        {{ heroImgEl }}
+        <sc-if value="{{ noProjectImages }}" hint-placeholder-val="{{ true }}">
+          <span style="{{ placeholderLabelStyle }}">COVER IMAGE</span>
+        </sc-if>
+      </div>
+      <div style="{{ projectDetailMetaRowStyle }}">
+        <h1 style="{{ projectDetailTitleStyle }}">{{ projectDetail.title }}</h1>
+        <span style="{{ projectDetailTagStyle }}">{{ projectDetail.company }} — {{ projectDetail.role }}</span>
+      </div>
+      <p style="{{ projectDetailBodyStyle }}">{{ projectDetail.description }}</p>
+      <sc-if value="{{ hasResults }}" hint-placeholder-val="{{ false }}">
+        <span style="{{ resultsLabelStyle }}">RESULT</span>
+        <ul style="{{ resultsListStyle }}">
+          <sc-for list="{{ projectDetail.results }}" as="r" hint-placeholder-count="2">
+            <li style="{{ resultItemStyle }}">{{ r }}</li>
+          </sc-for>
+        </ul>
+      </sc-if>
+      <div style="{{ projectDetailGridStyle }}">
+        <sc-for list="{{ projectGridImages }}" as="gi" hint-placeholder-count="4">
+          <div style="{{ projectDetailImgWrapStyle }}">
+            {{ gi.imgEl }}
+          </div>
+        </sc-for>
+      </div>
+    </main>
+  </sc-if>
+
+  <!-- PROFILE PAGE (about + career) -->
+  <sc-if value="{{ isProfileMain }}" hint-placeholder-val="{{ true }}">
+    <main key="profile" style="{{ profilePageStyle }}">
+      <div style="{{ aboutHeroStyle }}">
+        <span style="{{ aboutEyebrowCenterStyle }}">ABOUT</span>
+        <h1 style="{{ aboutHeroTitleStyle }}">전략적 사고와 크리에이티브 감각으로,<br>브랜드를 성장시킵니다.</h1>
+        <div style="{{ aboutDividerStyle }}"></div>
+        <p style="{{ aboutHeroBodyStyle }}">
+          브랜드 전략부터 콘텐츠, 퍼포먼스 마케팅까지 전 과정을 경험하며 브랜드 성장을 이끌어왔습니다.
+<br>&nbsp;데이터 기반 전략과 크리에이티브를 바탕으로 성과를 만들고, 생성형 AI를 활용한 콘텐츠 제작까지 <br>역량을 확장하고 있습니다.
+        </p>
+        <div style="{{ aboutMetaRowStyle }}">
+          <div style="{{ aboutMetaColStyle }}">
+            <div style="{{ aboutMetaDividerStyle }}"></div>
+            <span style="{{ aboutMetaLabelStyle }}">NAME</span>
+            <span style="{{ aboutMetaValueStyle }}">Kim Woojeong</span>
+          </div>
+          <div style="{{ aboutMetaColStyle }}">
+            <div style="{{ aboutMetaDividerStyle }}"></div>
+            <span style="{{ aboutMetaLabelStyle }}">ROLE</span>
+            <span style="{{ aboutMetaValueStyle }}">Marketing &amp; Content</span>
+          </div>
+          <div style="{{ aboutMetaColStyle }}">
+            <div style="{{ aboutMetaDividerStyle }}"></div>
+            <span style="{{ aboutMetaLabelStyle }}">CONTACT</span>
+            <sc-for list="{{ contactRows }}" as="row" hint-placeholder-count="2">
+              <a href="{{ row.href }}" class="pf-social" style="{{ aboutMetaLinkStyle }}">{{ row.label }}</a>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+
+      <div style="{{ careerSectionStyle }}">
+        <span style="{{ eyebrowStyle }}">CAREER</span>
+        <sc-for list="{{ careerItems }}" as="job" hint-placeholder-count="2">
+          <div class="pf-row" style="{{ careerRowStyle }}" onClick="{{ job.onOpen }}">
+            <span style="{{ careerCompanyStyle }}">{{ job.company }}</span>
+            <span style="{{ careerRoleStyle }}">{{ job.role }}</span>
+            <span style="{{ careerPeriodStyle }}">{{ job.period }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </main>
+  </sc-if>
+
+  <!-- ARCHIVE LIST PAGE -->
+  <sc-if value="{{ isArchiveList }}" hint-placeholder-val="{{ false }}">
+    <main key="archive" style="{{ archivePageStyle }}">
+      <div style="{{ archiveHeaderStyle }}">
+        <div style="{{ archiveTitleRowStyle }}">
+          <span style="{{ archiveTitleStyle }}">Archive</span>
+          <div style="{{ archiveCategoryTabRowStyle }}">
+            <sc-for list="{{ archiveCategoryTabs }}" as="tab" hint-placeholder-count="3">
+              <button style="{{ tab.style }}" onClick="{{ tab.onClick }}">{{ tab.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <span style="{{ archiveCategoryDescStyle }}">{{ archiveCategoryDesc }}</span>
+      </div>
+      <div style="{{ archiveGridStyle }}">
+        <sc-for list="{{ archiveFolders }}" as="folder" hint-placeholder-count="12">
+          <div class="pf-row" style="{{ folderCardStyle }}" onClick="{{ folder.onOpen }}">
+            <div style="{{ folder.thumbStyle }}">
+              {{ folder.thumbEl }}
+              <sc-if value="{{ folder.isPlaceholder }}" hint-placeholder-val="{{ true }}">
+                <span style="{{ folderThumbLabelStyle }}">{{ folder.count }} PHOTOS</span>
+              </sc-if>
+            </div>
+            <div style="{{ folderCaptionStyle }}">
+              <span style="{{ folderTitleStyle }}">{{ folder.title }}</span>
+              <span style="{{ folderMetaStyle }}">{{ folder.company }} — {{ folder.role }}</span>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </main>
+  </sc-if>
+
+  <!-- ARCHIVE DETAIL PAGE -->
+  <sc-if value="{{ isArchiveDetail }}" hint-placeholder-val="{{ false }}">
+    <main key="archive-detail" style="{{ archivePageStyle }}">
+      <div style="{{ archiveDetailHeaderStyle }}">
+        <a href="#" class="pf-social" style="{{ backLinkStyle }}" onClick="{{ closeArchiveFolder }}">← BACK TO ARCHIVE</a>
+        <span style="{{ archiveTitleStyle }}">{{ activeFolder.title }}</span>
+        <span style="{{ archiveSubStyle }}">{{ activeFolder.subLabel }}</span>
+        <sc-if value="{{ hasFolderDescription }}" hint-placeholder-val="{{ false }}">
+          <p style="{{ archiveDetailDescStyle }}">{{ activeFolder.description }}</p>
+        </sc-if>
+      </div>
+      <div style="{{ archiveDetailImgGridStyle }}">
+        <sc-for list="{{ archiveImages }}" as="img" hint-placeholder-count="6">
+          <div style="{{ img.imgStyle }}">
+            {{ img.mediaEl }}
+            <sc-if value="{{ img.isPlaceholder }}" hint-placeholder-val="{{ true }}">
+              <sc-if value="{{ img.isVideo }}" hint-placeholder-val="{{ false }}">
+                <div style="{{ playIconStyle }}">▶</div>
+                <span style="{{ placeholderLabelStyle }}">VIDEO</span>
+              </sc-if>
+              <sc-if value="{{ img.isPhoto }}" hint-placeholder-val="{{ true }}">
+                <span style="{{ placeholderLabelStyle }}">PHOTO</span>
+              </sc-if>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </main>
+  </sc-if>
+
+  <!-- CAREER DETAIL PAGE -->
+  <sc-if value="{{ isCareerDetail }}" hint-placeholder-val="{{ false }}">
+    <main key="career-detail" style="{{ careerDetailPageStyle }}">
+      <a href="#" class="pf-social" style="{{ backLinkStyle }}" onClick="{{ closeCareerDetail }}">← BACK TO PROFILE</a>
+      <div style="{{ careerDetailHeaderStyle }}">
+        <span style="{{ careerDetailCompanyStyle }}">{{ careerDetail.company }}</span>
+        <span style="{{ careerDetailTitleStyle }}">{{ careerDetail.title }}</span>
+      </div>
+      <div style="{{ overviewBoxStyle }}">
+        <sc-for list="{{ careerDetail.overview }}" as="ov" hint-placeholder-count="3">
+          <div style="{{ overviewRowStyle }}">
+            <span style="{{ overviewLabelStyle }}">{{ ov.label }}</span>
+            <span style="{{ overviewValueStyle }}">{{ ov.value }}</span>
+          </div>
+        </sc-for>
+      </div>
+      <sc-for list="{{ careerDetail.sections }}" as="sec" hint-placeholder-count="6">
+        <div style="{{ resumeSectionStyle }}">
+          <span style="{{ resumeSectionTitleStyle }}">{{ sec.title }}</span>
+          <ul style="{{ resumeListStyle }}">
+            <sc-for list="{{ sec.items }}" as="li_item" hint-placeholder-count="3">
+              <li style="{{ resumeItemStyle }}">{{ li_item }}</li>
+            </sc-for>
+          </ul>
+        </div>
+      </sc-for>
+    </main>
+  </sc-if>
+
+  <!-- CONTACT PAGE (disabled) -->
+  <sc-if value="{{ false }}" hint-placeholder-val="{{ false }}">
+    <main key="contact" style="{{ contactPageStyle }}">
+      <div style="{{ contactCornerStyle }}">
+        <sc-for list="{{ contactRows }}" as="row" hint-placeholder-count="3">
+          <a href="{{ row.href }}" class="pf-social" style="{{ contactRowStyle }}">
+            <span style="{{ contactRowLabelStyle }}">{{ row.label }}</span>
+            <span style="{{ contactRowValueStyle }}">{{ row.value }}</span>
+          </a>
+        </sc-for>
+      </div>
+      <div style="{{ talkGridStyle }}">
+        <sc-for list="{{ talkLetters }}" as="letter" hint-placeholder-count="4">
+          <span style="{{ letter.style }}">{{ letter.char }}</span>
+        </sc-for>
+      </div>
+      <div style="{{ footerStyle }}">
+        <span style="{{ footerCopyStyle }}">© 2026 Portfolio. All work and images belong to their respective owners.</span>
+        <div style="{{ footerLinksStyle }}">
+          <a href="mailto:cocoship__@naver.com" class="pf-social" style="{{ footerLinkStyle }}">Email</a>
+          <a href="https://instagram.com/cocoship__" class="pf-social" style="{{ footerLinkStyle }}">Instagram</a>
+        </div>
+      </div>
+    </main>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;bgTone&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;warm&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;warm&quot;,&quot;neutral&quot;,&quot;cool&quot;,&quot;dark&quot;]},&quot;flipCompanies&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+const TRANSPARENT_PX = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBTAA7';
+class Component extends DCLogic {
+  state = {
+    introDone: false,
+    page: 'home',
+    hover: null, // { side: 'left'|'right', idx }
+    projectDetail: null,
+    archiveFolder: null,
+    careerDetail: null,
+    companyTab: 'PORTRÉ',
+    projectUnlocked: false,
+    showProjectLock: false,
+    passcodeInput: '',
+    passcodeError: false,
+    careerUnlocked: false,
+    showCareerLock: false,
+    pendingCareerId: null,
+    careerPasscodeInput: '',
+    careerPasscodeError: false,
+    homeIdx: 0,
+    archiveCategory: 'photo',
+    mediaReady: true,
+    mouseX: 0,
+    mouseY: 0,
+  };
+
+  componentDidMount() {
+    this._homeInterval = setInterval(() => {
+      this.setState(s => ({ homeIdx: s.homeIdx + 1 }));
+    }, 2600);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this._homeInterval);
+  }
+
+  setPage(p) {
+    this.setState({ page: p, hover: null, projectDetail: null, archiveFolder: null, careerDetail: null });
+  }
+
+  submitPasscode() {
+    if (this.state.passcodeInput === '9602') {
+      this.setState({ projectUnlocked: true, showProjectLock: false, passcodeInput: '' });
+      this.setPage('project');
+    } else {
+      this.setState({ passcodeError: true });
+    }
+  }
+
+  submitCareerPasscode() {
+    if (this.state.careerPasscodeInput === '9602') {
+      this.setState({ careerUnlocked: true, showCareerLock: false, careerPasscodeInput: '', careerDetail: this.state.pendingCareerId, pendingCareerId: null });
+    } else {
+      this.setState({ careerPasscodeError: true });
+    }
+  }
+
+  makeProjects(items, companyLabel, side) {
+    return items.map((it, i) => ({
+      num: String(i + 1).padStart(2, '0'),
+      title: it.title,
+      role: it.role,
+      company: companyLabel,
+      onEnter: () => this.setState({ hover: { side, idx: i } }),
+      cardImgSeed: i,
+      cardImage: it.cardImage || null,
+      onClick: () => this.setState({
+        projectDetail: {
+          num: String(i + 1).padStart(2, '0'),
+          title: it.title,
+          role: it.role,
+          company: companyLabel,
+          description: it.description || '이 프로젝트의 배경, 목표, 진행 과정을 담는 상세 설명 placeholder입니다. 캠페인 전략, 비주얼 방향, 결과 등을 자유롭게 채워주세요.',
+          results: it.results || [],
+          images: it.images || [],
+        },
+      }),
+    }));
+  }
+
+  renderVals() {
+    const bgTone = this.props.bgTone ?? 'warm';
+    const flip = this.props.flipCompanies ?? false;
+
+    const tones = {
+      dark: { bg: 'oklch(11% 0.004 264)', ink: 'oklch(93% 0.004 264)' },
+      warm: { bg: 'oklch(97.5% 0.008 75)', ink: 'oklch(18% 0.006 60)' },
+      neutral: { bg: 'oklch(97.5% 0.002 0)', ink: 'oklch(16% 0.002 0)' },
+      cool: { bg: 'oklch(97.5% 0.008 240)', ink: 'oklch(17% 0.006 240)' },
+    };
+    const tone = tones[bgTone] || tones.dark;
+    const ink = tone.ink;
+    const isDark = bgTone === 'dark';
+    const mutedInk = isDark ? 'oklch(68% 0.006 264)' : 'oklch(58% 0.01 ' + (bgTone === 'cool' ? 240 : bgTone === 'neutral' ? 0 : 60) + ')';
+    const faintInk = isDark ? 'oklch(48% 0.006 264)' : 'oklch(72% 0.008 ' + (bgTone === 'cool' ? 240 : bgTone === 'neutral' ? 0 : 60) + ')';
+
+    const serif = "'Cormorant Garamond', Georgia, serif";
+    const sans = "'Archivo', Helvetica, Arial, sans-serif";
+
+    const pages = [
+      { id: 'profile', label: 'ABOUT' },
+      { id: 'project', label: 'PROJECT' },
+      { id: 'archive', label: 'ARCHIVE' },
+    ];
+
+    const navItems = pages.map(p => ({
+      label: p.label,
+      onClick: (e) => {
+        e.preventDefault();
+        if (p.id === 'project' && !this.state.projectUnlocked) {
+          this.setState({ showProjectLock: true, passcodeInput: '', passcodeError: false });
+        } else {
+          this.setPage(p.id);
+        }
+      },
+      style: {
+        fontFamily: sans,
+        fontSize: '13px',
+        letterSpacing: '0.14em',
+        color: this.state.page === p.id ? ink : mutedInk,
+        textDecoration: 'none',
+        paddingBottom: '8px',
+        borderBottom: this.state.page === p.id ? '1px solid ' + ink : '1px solid transparent',
+        transition: 'color 0.35s ease, border-color 0.35s ease',
+        opacity: this.state.page === p.id ? 1 : 0.85,
+      },
+    }));
+
+    const jungsaemmoolRaw = [
+      {
+        title: 'Google Best in Class 선정 \nIMC 캠페인',
+        role: 'IMC Campaign · Brand Strategy · PR',
+        description: '브랜드 철학인 \'Find Youtiful\'을 소비자 경험으로 연결하기 위해 TVC, 디지털, SNS, PR을 아우르는 통합 IMC 캠페인을 기획·운영했습니다. \'찾아봐, 너만의 아름다움\'이라는 메시지를 중심으로 브랜드 아이덴티티를 일관되게 전달하고, 온·오프라인 접점을 확장해 브랜드 인지도와 구매 전환을 동시에 높였습니다.',
+        results: ['Google Best in Class 사례 선정', '25~34세 타겟 구매전환율 7% 이상 상승', '브랜드 철학 및 캠페인 메시지 확산'],
+        images: ['FIND_YOUTIFUL_1.png', 'FIND_YOUTIFUL_2.png', 'FIND_YOUTIFUL_3.png', 'FIND_YOUTIFUL_4.png'].map(f => 'uploads/' + f),
+        cardImage: 'uploads/FIND_YOUTIFUL_3-33b7a5e9.png',
+      },
+      {
+        title: '올리브영 쿠션 1위를 만든 \n바이럴 마케팅',
+        role: 'Viral Marketing · Influencer · Content Strategy',
+        description: '올리브영 상반기 최대 프로모션 \'파워팩\'의 매출 극대화와 검색 점유율 확보를 목표로 바이럴 마케팅 전략을 기획했습니다. 초기 화제성 확보와 지속적인 검색 노출을 위해 리딩군·서포터군 이원화 전략을 수립하고, 유튜브·인스타그램·블로그를 활용한 콘텐츠를 운영했습니다.',
+        results: ['바이럴 콘텐츠 132건 배포', '인플루언서 콘텐츠 조회수 2.3만+', '올리브영 쿠션 카테고리 1위 달성', '프로모션 KPI 달성 및 매출 기여'],
+        images: ['바이럴마케팅_1.png'].map(f => 'uploads/' + f),
+      },
+      {
+        title: 'ROAS 979%를 달성한 \n퍼포먼스 마케팅',
+        role: 'Performance Marketing · Meta Ads · Retargeting',
+        description: '프로모션 기간 구매전환을 극대화하기 위해 데이터 기반 퍼포먼스 광고 전략을 운영했습니다. 광고 피로도를 개선하기 위해 소재를 지속적으로 다각화하고, 구매 단계별 리타겟팅 전략을 적용해 광고 효율을 높였습니다.',
+        results: ['ROAS 최대 979% 달성', '월평균 ROAS 406%', '광고 소재 최적화를 통한 지속적인 효율 개선'],
+        images: ['디지털광고_1.jpeg', '디지털광고_2.png', '디지털광고_3.png', '디지털광고_4.png'].map(f => 'uploads/' + f),
+      },
+      {
+        title: '브랜드 아이덴티티를 구축한 \n콘텐츠 전략',
+        role: 'Content Strategy · SNS · Creative',
+        description: '브랜드 아이덴티티를 일관되게 전달하고 2030 고객과의 접점을 확대하기 위해 온드미디어 콘텐츠를 기획·운영했습니다. 브랜드 톤앤매너를 기반으로 콘텐츠와 비주얼을 기획하며 브랜드 경험을 강화했습니다.',
+        results: ['브랜드 아이덴티티 강화', '콘텐츠 참여도 및 인게이지먼트 향상', '신제품 커뮤니케이션 강화'],
+        images: ['온드미디어_1.png', '온드미디어_2.png', '온드미디어_3.png'].map(f => 'uploads/' + f),
+      },
+      {
+        title: '브랜드 경험을 확장한 \n전시 프로젝트',
+        role: 'Brand Experience · Exhibition · PR',
+        description: '플래그십 스토어를 브랜드 경험 공간으로 확장하기 위해 시즌별 전시 프로젝트를 기획·운영했습니다. 전시와 체험 프로그램을 통해 브랜드 철학을 공간 경험으로 전달하고 고객 접점을 확대했습니다.',
+        results: ['시즌 5~8 전시 운영', '언론 홍보를 통한 브랜드 노출 확대', 'SNS 이벤트 및 클래스 운영으로 고객 참여 확대'],
+        images: ['플롭스인아트_1.jpeg', '플롭스인아트_2.png', '플롭스인아트_3.png', '플롭스인아트_4.png', '플롭스인아트_5.png', '플롭스인아트_6.png'].map(f => 'uploads/' + f),
+        cardImage: 'uploads/플롭스인아트_5-66fd2f0d.png',
+      },
+    ];
+    const portreRaw = [
+      {
+        title: '데이터 기반 성장을 이끈 \n퍼포먼스 마케팅',
+        role: 'Performance Marketing · Meta Ads · Digital Strategy',
+        description: '브랜드 초기 성장 단계에서 퍼포먼스 마케팅을 중심으로 브랜드 인지도와 매출을 동시에 확대했습니다. Meta, 네이버 브랜드검색, 카카오 등 주요 디지털 채널을 운영하며 캠페인별 광고 전략을 수립하고, 데이터 기반 최적화를 통해 광고 효율을 지속적으로 개선했습니다.',
+        results: ['평균 ROAS 505% 달성', '최고 ROAS 1,058% 달성', '월 평균 노출 96만+ · 클릭 1.7만+', '브랜드검색 키워드 14개 → 33개 확대'],
+      },
+      {
+        title: '브랜드 비주얼을 완성한 \n콘텐츠 제작',
+        role: 'Creative Direction · Content Production · Visual Branding',
+        description: '브랜드 아이덴티티를 일관되게 전달하기 위해 시즌 캠페인과 신제품 중심의 비주얼 콘텐츠를 기획·제작했습니다. 촬영 기획부터 디렉팅, 영상 편집, 상세페이지 제작까지 전 과정을 운영하며 브랜드의 톤앤매너를 구축하고 콘텐츠 품질을 강화했습니다.',
+        results: ['월 2회 이상 브랜드 촬영 운영', '시즌별 캠페인 및 신제품 콘텐츠 제작', '숏폼 콘텐츠 지속 제작 및 운영', '브랜드 비주얼 일관성 강화'],
+      },
+      {
+        title: '생성형 AI를 활용한 \n비주얼 콘텐츠 제작',
+        role: 'Generative AI · Creative Production · Workflow Innovation',
+        description: '생성형 AI를 활용해 이미지와 영상 콘텐츠 제작 프로세스를 구축했습니다. 브랜드 무드를 유지하면서도 다양한 크리에이티브를 빠르게 제작할 수 있는 제작 환경을 마련해 콘텐츠 생산성과 운영 효율을 높였습니다.',
+        results: ['생성형 AI 콘텐츠 12건 이상 제작', '제작 리드타임 단축', '다양한 크리에이티브 제작 방식 확보', '콘텐츠 제작 효율 향상'],
+      },
+      {
+        title: '브랜드 성장을 이끈 \n인플루언서 바이럴 마케팅',
+        role: 'Influencer Marketing · Seeding · Creator Campaign',
+        description: '브랜드 인지도 확대와 자연스러운 소비자 콘텐츠 확산을 위해 무가·유가 인플루언서를 아우르는 바이럴 마케팅 체계를 구축했습니다. 제품 런칭 일정에 맞춰 크리에이터를 발굴하고 콘텐츠 방향성을 기획하며 지속적인 바이럴 생태계를 운영했습니다.',
+        results: ['무가 바이럴 66건 → 120건 확대', '유가 캠페인 2건 → 80건 이상 운영', '연간 200건 이상 바이럴 콘텐츠 운영', '제품 런칭별 시딩 프로세스 구축'],
+      },
+      {
+        title: '브랜드 팬덤을 만든 \n서포터즈 프로그램 운영',
+        role: 'Community Building · CRM · User Generated Content',
+        description: '브랜드 충성 고객을 확보하기 위해 공식 서포터즈 PORTR8IGHT 프로그램을 기획·운영했습니다. 제품 체험을 넘어 브랜드 철학을 경험하는 커뮤니티를 구축하고, 지속적인 UGC를 생산하며 브랜드 팬덤 형성에 기여했습니다.',
+        results: ['PORTR8IGHT 1기 운영', '미션 콘텐츠 189건 이상 생성', '브랜드 UGC 지속 확보', '고객 커뮤니티 운영 체계 구축'],
+      },
+      {
+        title: '신제품 런칭 성과를 만든 \nIMC 캠페인',
+        role: 'Launch Marketing · IMC · Promotion',
+        description: '쿠션, 파우더팩트, 핸드크림, 네일 등 주요 신제품 런칭 시 디지털 광고, SNS, 바이럴, 프로모션을 통합 운영했습니다. 제품별 USP를 기반으로 콘텐츠와 광고 전략을 기획해 런칭 초기 인지도와 구매 전환을 확보했습니다.',
+        results: ['연간 주요 신제품 런칭 캠페인 운영', '카카오쇼핑라이브 매출 6천만 원 달성', '메이크업 카테고리 1위 유지 기여', '온·오프라인 프로모션 통합 운영'],
+      },
+      {
+        title: '오프라인 브랜드 경험을 확장한 \n팝업 프로젝트',
+        role: 'Offline Marketing · Event · Brand Experience',
+        description: '뷰티컬리 페스타 오프라인 부스를 기획·운영하며 온라인에서 형성된 브랜드 경험을 오프라인으로 확장했습니다. 공간 구성부터 현장 운영, 콘텐츠 연계까지 전 과정을 담당하며 고객 접점을 확대하고 브랜드 경험을 강화했습니다.',
+        results: ['뷰티컬리 페스타 부스 운영', '브랜드 체험 고객 접점 확대', '오프라인·온라인 연계 콘텐츠 운영', '브랜드 경험 강화'],
+      },
+    ];
+
+    const jungsaemmool = {
+      label: 'JUNGSAEMMOOL',
+      sub: 'Color Cosmetics & Skincare',
+      projects: this.makeProjects(jungsaemmoolRaw, 'JUNGSAEMMOOL', 'left'),
+    };
+    const portre = {
+      label: 'PORTRÉ',
+      sub: 'Marketing & Brand Studio',
+      projects: this.makeProjects(portreRaw, 'PORTRÉ', 'right'),
+    };
+
+    const leftCompany = flip ? portre : jungsaemmool;
+    const rightCompany = flip ? jungsaemmool : portre;
+    // fix side keys to match actual column after flip
+    leftCompany.projects = this.makeProjects(flip ? portreRaw : jungsaemmoolRaw, leftCompany.label, 'left');
+    rightCompany.projects = this.makeProjects(flip ? jungsaemmoolRaw : portreRaw, rightCompany.label, 'right');
+
+    const companyTab = this.state.companyTab;
+    const activeTabCompany = companyTab === jungsaemmool.label ? jungsaemmool : portre;
+    const companyTabs = [portre, jungsaemmool].map(c => ({
+      label: c.label,
+      onClick: () => this.setState({ companyTab: c.label }),
+      style: {
+        fontFamily: sans, fontSize: '14px', fontWeight: 600, letterSpacing: '0.04em', cursor: 'pointer',
+        padding: '8px 0', borderBottom: companyTab === c.label ? '2px solid ' + ink : '2px solid transparent',
+        color: companyTab === c.label ? ink : faintInk,
+      },
+    }));
+
+    const stripeBg = (seed) => ({
+      backgroundImage: 'repeating-linear-gradient(' + (45 + seed) + 'deg, oklch(30% 0.01 60 / 0.06) 0px, oklch(30% 0.01 60 / 0.06) 2px, transparent 2px, transparent 14px)',
+      backgroundColor: 'oklch(93% 0.006 60)',
+    });
+
+    const allRaw = jungsaemmoolRaw.map(it => ({ ...it, company: 'JUNGSAEMMOOL' }))
+      .concat(portreRaw.map(it => ({ ...it, company: 'PORTRÉ' })));
+
+    const mediaTypes = ['photo', 'video', 'ai'];
+    const enc = (p) => this.state.mediaReady ? encodeURI(p.normalize('NFD')) : undefined;
+    const realAiFolders = [
+      {
+        id: 'ai-1',
+        title: 'Nail Nouveau Jus',
+        previewImage: 'uploads/nail nouveau jus.jpg',
+        role: 'AI 이미지·영상 제작',
+        company: 'PORTRÉ',
+        mediaType: 'ai',
+        isReal: true,
+        description: 'Nail Nouveau Jus 제품의 텍스처를 강조하기 위해 생성형 AI로 이미지와 영상을 제작했습니다. 브러시에서 흘러내리는 폴리시의 광택과 점도, 유리병에 맺히는 컬러의 레이어감을 극대화해 제품의 질감을 시각적으로 전달하는 데 집중했습니다.',
+        media: [
+          { type: 'image', src: 'uploads/portre_product-ai.jpg' },
+          { type: 'image', src: 'uploads/portre_brush-ai.jpg' },
+          { type: 'video', src: 'uploads/260625_네일누보주스 티징.mp4' },
+        ],
+      },
+      {
+        id: 'ai-atelier',
+        previewVideoIndex: 1,
+        title: 'The Atelier',
+        previewImage: 'uploads/the atelier.jpg',
+        role: 'AI 캐릭터 영상 제작',
+        company: 'PORTRÉ',
+        mediaType: 'ai',
+        isReal: true,
+        description: '매장 The Atelier 런칭을 위해 브랜드 캐릭터 ‘포트레빗’ 토끼를 설정하고, 생성형 AI로 공간 티징 영상을 제작했습니다.',
+        media: [
+          { type: 'video', src: 'uploads/260501_매장 티징 1.mp4' },
+          { type: 'video', src: 'uploads/260428_매장 티징.mp4' },
+        ],
+      },
+      {
+        id: 'ai-tint-dessin',
+        previewVideoIndex: 1,
+        title: 'Tint Glow Jour • Soft Dessin Duo',
+        previewImage: 'uploads/tint glow jour.jpeg',
+        role: 'AI 캐릭터 영상 제작',
+        company: 'PORTRÉ',
+        mediaType: 'ai',
+        isReal: true,
+        description: '신제품 Tint Glow Jour, Soft Dessin Duo 런칭을 위해 브랜드 캐릭터 ‘포트레빗’ 토끼를 설정하고, 생성형 AI로 제품 티징 영상을 제작했습니다.',
+        media: [
+          { type: 'video', src: 'uploads/260506_신제품 티징.mp4', poster: 'uploads/260506_신제품 티징 썸네일.jpeg' },
+          { type: 'video', src: 'uploads/DYEfMVhtY3X.mp4' },
+        ],
+      },
+      {
+        id: 'ai-3',
+        title: 'Hand Crema Nouveau',
+        previewImage: 'uploads/hand cream.jpeg',
+        role: '향 컨셉 이미지 · AI 영상 제작',
+        company: 'PORTRÉ',
+        mediaType: 'ai',
+        isReal: true,
+        description: '핸드크림 누보의 은은한 향을 시각적으로 표현하기 위해 실물 촬영 이미지와 생성형 AI로 제작한 이미지를 함께 활용해 티징 영상을 제작했습니다.',
+        media: [
+          { type: 'video', src: 'uploads/260118_핸드크림누보 티징_1.mp4' },
+        ],
+      },
+      {
+        id: 'ai-4',
+        title: 'Nail Nouveau Jus Holiday Edition',
+        previewImage: 'uploads/holiday edition.jpeg',
+        role: '모델 화보 · 제품 티징 제작',
+        company: 'PORTRÉ',
+        mediaType: 'ai',
+        isReal: true,
+        description: '네일 누보 주스 홀리데이 에디션 출시에 맞춰 모델 화보 촬영과 제품 티징 영상을 함께 기획·제작했습니다.',
+        media: [
+          { type: 'video', src: 'uploads/251113_홀리데이네일 티징.mp4' },
+          { type: 'video', src: 'uploads/251114_홀리데이네일 티징.mp4' },
+          { type: 'video', src: 'uploads/251120_모델ai.mp4' },
+        ],
+      },
+      {
+        id: 'ai-5',
+        title: 'Tint Matte',
+        previewImage: 'uploads/tint matte.jpeg',
+        role: '모델 화보 · AI 티징 제작',
+        company: 'PORTRÉ',
+        mediaType: 'ai',
+        isReal: true,
+        description: '틴트 매트 모델 화보 이미지를 생성형 AI로 자연스럽게 움직이는 영상으로 구현했습니다.',
+        media: [
+          { type: 'video', src: 'uploads/251110_틴트매트.mp4' },
+          { type: 'video', src: 'uploads/251015_틴트매트 ai 티징.mp4' },
+        ],
+      },
+      {
+        id: 'ai-7',
+        title: 'Blur Fit Powder Cheek',
+        role: '모델 화보 기획·제작',
+        company: 'PORTRÉ',
+        mediaType: 'ai',
+        isReal: true,
+        description: '블러 핏 파우더 치크 모델 화보 이미지를 생성형 AI로 자연스럽게 움직이는 영상으로 구현했습니다.',
+        media: [
+          { type: 'video', src: 'uploads/250909_치크 티징 릴스.mp4' },
+        ],
+      },
+      {
+        id: 'ai-8',
+        title: 'Velvet Layer Cushion Matte',
+        role: '모델 화보 · 제품 촬영 기획',
+        company: 'PORTRÉ',
+        mediaType: 'ai',
+        isReal: true,
+        description: '여름 시즌 신제품 벨벳 레이어 쿠션 매트의 무드에 맞춰 모델을 생성형 AI로 자연스럽게 움직이게 구현하고, 여름 느낌이 나도록 연출한 영상을 제작했습니다.',
+        media: [
+          { type: 'video', src: 'uploads/250826_매트쿠션 릴스.mp4' },
+          { type: 'video', src: 'uploads/매트쿠션.mp4' },
+        ],
+      },
+      {
+        id: 'ai-9',
+        previewVideoIndex: 2,
+        title: 'Promotion • Packaging',
+        previewImage: 'uploads/promotion.jpeg',
+        role: '프로모션 홍보 · 패키지 AI 영상 제작',
+        company: 'PORTRÉ',
+        mediaType: 'ai',
+        isReal: true,
+        description: '추석·카카오톡 선물하기 등 시즌 프로모션 홍보와 패키징 디테일을 강조하기 위해 생성형 AI로 영상을 제작했습니다.',
+        media: [
+          { type: 'video', src: 'uploads/251002_추석 프로모션.mp4' },
+          { type: 'video', src: 'uploads/251014_카카오톡선물하기 패키징.mp4' },
+          { type: 'video', src: 'uploads/DakSIXhhgF8.mp4' },
+        ],
+      },
+    ].map(f => ({
+      ...f,
+      count: f.media.length,
+      isPlaceholder: false,
+      thumbEl: (() => {
+        const explicitVideo = typeof f.previewVideoIndex === 'number'
+          ? f.media.filter(m => m.type === 'video')[f.previewVideoIndex]
+          : null;
+        const firstVideo = explicitVideo || f.media.find(m => m.type === 'video');
+        const mediaStyle = { width: '100%', height: '100%', objectFit: 'cover', display: 'block' };
+        if (firstVideo) {
+          const src = enc(firstVideo.src);
+          if (typeof src !== 'string') return null;
+          const poster = firstVideo.poster ? enc(firstVideo.poster) : undefined;
+          return React.createElement('video', { src, poster, muted: true, autoPlay: true, loop: true, playsInline: true, preload: 'metadata', style: mediaStyle });
+        }
+        const src = enc(f.previewImage || f.media[0].src);
+        if (typeof src !== 'string') return null;
+        return React.createElement('img', { src, alt: f.title, style: mediaStyle, loading: 'lazy', decoding: 'async' });
+      })(),
+      thumbStyle: {
+        width: '100%', aspectRatio: '3/4',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        overflow: 'hidden', background: 'oklch(93% 0.006 60)',
+      },
+      onOpen: () => this.setState({ archiveFolder: f.id }),
+    }));
+
+    const generatedFolders = allRaw.map((it, i) => ({
+      id: 'f' + i,
+      num: String(i + 1).padStart(2, '0'),
+      title: it.title,
+      role: it.role,
+      company: it.company,
+      mediaType: 'hidden',
+      isReal: false,
+      isPlaceholder: true,
+      count: 6,
+      thumbStyle: {
+        width: '100%', aspectRatio: '4/3', ...stripeBg(i * 5),
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      },
+      onOpen: () => this.setState({ archiveFolder: 'f' + i }),
+    }));
+
+    const videoClipFiles = [
+      'DahmIqLMI_T.mp4', 'DacfMqtPwaM.mp4', 'DaSJBXSgPLp.mp4', 'DYWl80xN_Oc.mp4', 'DX8egI6RArp.mp4',
+      'DX0sLGqv9Cf.mp4', 'DXYro0LD6wX.mp4', 'DW8YiZeDvXj.mp4', 'DWGXBGPjD-e.mp4', 'DUh9qvAjJkx.mp4',
+      'DUIQYCPl37s.mp4', 'DT2GGQ4kWkN.mp4', 'DTfAdNBl-nh.mp4',
+      'DRT_PP-ibYo.mp4', 'DSZe2YACVAz.mp4',
+      'DSJ-uvyDPAU.mp4', 'DSUEoqXEVG6.mp4', 'DR39h5sF5s8.mp4', 'DQEFTUVDNVo.mp4', 'DOVbvYQj9JX.mp4', 'DOQU79BDRJQ.mp4',
+      'DJ8xlcWNs8Z.mp4', 'DJ_DddxODBb.mp4',
+      'DLRuHM6xDih.mp4', 'DL1yazxv130.mp4', 'DK9EizzRf-J.mp4',
+      'DHDnDt3vhu8.mp4', 'DHiLG4zuCJF.mp4',
+      'DEwm6JKvoMo.mp4', 'DFMsP5wJqcf.mp4', 'DEEwHyeJUxj.mp4', 'DDyw1GRMjcM.mp4', 'DDofSziJxJj.mp4',
+      'DDogBLvJIX-.mp4', 'DCBiSN_pL4Y.mp4', 'DBdXDncvTdL.mp4', 'DBS4yq2pY7e.mp4', 'DAno3CMOQ5q.mp4',
+    ];
+    const videoRealFolders = videoClipFiles.map((fname, i) => ({
+      id: 'vid-' + i,
+      title: 'Video ' + String(i + 1).padStart(2, '0'),
+      role: '',
+      company: 'PORTRÉ',
+      mediaType: 'video',
+      isReal: true,
+      description: '',
+      media: [{ type: 'video', src: 'uploads/' + fname }],
+    }));
+
+    const photoRealFolders = [
+      {
+        id: 'photo-1',
+        title: 'Nail Nouveau Jus - Summer Edition',
+        role: 'Concept: Pure, Simple, Color',
+        company: 'PORTRÉ',
+        mediaType: 'photo',
+        isReal: true,
+        description: 'Pure, Simple, Color 컨셉으로 진행한 Nail Nouveau Jus 여름 시즌 화보입니다.',
+        media: [
+          'portre_1274.jpg', 'portre_1409.jpg', 'portre_1610.jpg', 'portre_2194.jpg', 'portre_2278.jpg',
+          'portre_2348.jpg', 'portre_2416.jpg', 'portre_2441.jpg', 'portre_2537.jpg',
+        ].map(fname => ({ type: 'image', src: 'uploads/' + fname })),
+      },
+      {
+        id: 'photo-2',
+        title: 'Soft Filter Powder Pact',
+        role: 'Concept: Transparent, Veil, Texture',
+        company: 'PORTRÉ',
+        mediaType: 'photo',
+        isReal: true,
+        description: 'Transparent, Veil, Texture 컨셉으로 진행한 Soft Filter Powder Pact 화보입니다.',
+        media: [
+          'portre_7998.jpg', 'portre_8018.jpg', 'portre_8030_1.jpg', 'portre_8115.jpg', 'portre_8130.jpg', 'portre_8135.jpg',
+        ].map(fname => ({ type: 'image', src: 'uploads/soft filter powder pact/' + fname })),
+      },
+      {
+        id: 'photo-3',
+        title: 'Soft Dessin Duo',
+        role: 'Concept: Stationery, Drawing, Pencil',
+        company: 'PORTRÉ',
+        mediaType: 'photo',
+        isReal: true,
+        description: 'Stationery, Drawing, Pencil 컨셉으로 진행한 Soft Dessin Duo 화보입니다.',
+        media: [
+          'portre_1283_2.jpg', 'portre_1344_2.jpg', 'portre_1374_2.jpg', 'portre_1438.jpg',
+          'portre_1465_2.jpg', 'portre_1527_3.jpg', 'portre_1584.jpg', 'portre_5662_1.jpg',
+        ].map(fname => ({ type: 'image', src: 'uploads/soft dessin duo/' + fname })),
+      },
+      {
+        id: 'photo-4',
+        title: 'Tint Glow Jour - New Color',
+        role: 'Concept: Lovely, Neutral, Sweet',
+        company: 'PORTRÉ',
+        mediaType: 'photo',
+        isReal: true,
+        description: 'Lovely, Neutral, Sweet 컨셉으로 진행한 Tint Glow Jour 신규 컬러 화보입니다.',
+        media: [
+          'portre_1678.jpg', 'portre_1657.jpg', 'portre_1825.jpg', 'portre_1841.jpg', 'portre_1842.jpg',
+          'portre_1900.jpg', 'portre_1901.jpg', 'portre_1902.jpg', 'portre_5731_2.jpg',
+        ].map(fname => ({ type: 'image', src: 'uploads/tint glow jour new color/' + fname })),
+      },
+      {
+        id: 'photo-5',
+        title: 'Shadow Nouveau',
+        role: 'Concept: Velvet, Opaque, Dessert',
+        company: 'PORTRÉ',
+        mediaType: 'photo',
+        isReal: true,
+        description: 'Velvet, Opaque, Dessert 컨셉으로 진행한 Shadow Nouveau 화보입니다.',
+        media: [
+          'portre_1110.jpg', 'portre_1113.jpg', 'portre_1144.jpg', 'portre_1188.jpg',
+          'portre_2888.jpg', 'portre_3488.jpg', 'portre_3537_1.jpg', 'portre_3600.jpg',
+        ].map(fname => ({ type: 'image', src: 'uploads/Shadow Nouveau/' + fname })),
+      },
+      {
+        id: 'photo-6',
+        title: 'Water Fit Skin Tint',
+        role: 'Concept: Moisture, Texture, Glass',
+        company: 'PORTRÉ',
+        mediaType: 'photo',
+        isReal: true,
+        description: 'Moisture, Texture, Glass 컨셉으로 진행한 Water Fit Skin Tint 화보입니다.',
+        media: [
+          'portre_1600.jpg', 'portre_1700.jpg', 'portre_1769.jpg', 'portre_1844.jpg', 'portre_1906.jpg', 'portre_2000.jpg',
+        ].map(fname => ({ type: 'image', src: 'uploads/water fit skin tint/' + fname })),
+      },
+      {
+        id: 'photo-7',
+        title: 'Bare Color Balm AD',
+        role: 'Concept: Renewal, Clear, Transparent',
+        company: 'PORTRÉ',
+        mediaType: 'photo',
+        isReal: true,
+        description: 'Renewal, Clear, Transparent 컨셉으로 진행한 Bare Color Balm AD 화보입니다.',
+        media: [
+          'portre_3387.jpg', 'portre_3411.jpg', 'portre_3473.jpg', 'portre_3488.jpg', 'portre_3516.jpg', 'portre_3533.jpg',
+          'portre_3581.jpg', 'portre_3698.jpg', 'portre_3739.jpg', 'portre_3748.jpg', 'portre_3769.jpg', 'portre_3785.jpg',
+        ].map(fname => ({ type: 'image', src: 'uploads/bare color balm/' + fname })),
+      },
+      {
+        id: 'photo-8',
+        title: 'Hand Cream Nouveau - New Scent',
+        role: 'Concept: Scent, Daily, Mood',
+        company: 'PORTRÉ',
+        mediaType: 'photo',
+        isReal: true,
+        description: 'Scent, Daily, Mood 컨셉으로 진행한 Hand Cream Nouveau 신규 향 화보입니다.',
+        media: [
+          'portre_4600-6860d3db.jpg', 'portre_5000-7fabfe1e.JPG', 'portre_5064_2-24b19ff9.JPG', 'portre_5132-222de94f.jpg',
+          'portre_5431-8e601c89.jpg', 'portre_5432-036fa951.jpg', 'portre_5500-016e014a.jpg',
+          '네이키드 릴리 2-8eea6240.JPG', '베일드 우드 3-2c52b2c8.jpg', '애프터 레인 2-515c19f6.jpg',
+        ].map(fname => ({ type: 'image', src: 'uploads/hand cream nouveau/' + fname })),
+      },
+      {
+        id: 'photo-9',
+        title: 'Nail Nouveau Jus - Holiday Edition',
+        role: 'Concept: Sparkle, Vintage, Holiday',
+        company: 'PORTRÉ',
+        mediaType: 'photo',
+        isReal: true,
+        description: 'Sparkle, Vintage, Holiday 컨셉으로 진행한 Nail Nouveau Jus 홀리데이 에디션 화보입니다.',
+        media: ['portre_1533.jpg', 'portre_1636.jpg', 'portre_1697.jpg', 'portre_1871.jpg', 'portre_1975.jpg', 'portre_2029.jpg']
+          .map(fname => ({ type: 'image', src: 'uploads/holiday edition/' + fname }))
+          .concat([{ type: 'image', src: 'uploads/portre_1966.jpg' }, { type: 'image', src: 'uploads/portre_1600-e3ba06dc.jpg' }]),
+      },
+      {
+        id: 'photo-10',
+        title: 'Tint Matte',
+        role: 'Concept: Matte, Bold Composition, Color',
+        company: 'PORTRÉ',
+        mediaType: 'photo',
+        isReal: true,
+        description: 'Matte, Bold Composition, Color 컨셉으로 진행한 Tint Matte 화보입니다.',
+        media: ['portre_0020.jpg', 'portre_0034_2.jpg', 'portre_0085.jpg', 'portre_0242_2.jpg', 'portre_0258_2.jpg', 'portre_0281.jpg', 'portre_0285_2.jpg', 'portre_0311_2.jpg', 'portre_0377.jpg', 'portre_0387_2.jpg']
+          .map(fname => ({ type: 'image', src: 'uploads/Tint matte/' + fname })),
+      },
+      {
+        id: 'photo-11',
+        title: 'Blur Fit Powder Cheek',
+        role: 'Concept: Blurry, Radiant',
+        company: 'PORTRÉ',
+        mediaType: 'photo',
+        isReal: true,
+        description: 'Blurry, Radiant 컨셉으로 진행한 Blur Fit Powder Cheek 화보입니다.',
+        media: ['portre_2907.jpg', 'portre_2936.jpg', 'portre_3018.jpg', 'portre_3026.jpg', 'portre_3146_1.jpg', 'portre_3830.jpg', 'portre_3858.jpg', 'portre_4000_1.jpg']
+          .map(fname => ({ type: 'image', src: 'uploads/blur fit powder cheek/' + fname })),
+      },
+      {
+        id: 'photo-12',
+        title: 'Velvet Layer Cushion Matte',
+        role: 'Concept: Downy Texture, Light, Layer',
+        company: 'PORTRÉ',
+        mediaType: 'photo',
+        isReal: true,
+        description: 'Downy Texture, Light, Layer 컨셉으로 진행한 Velvet Layer Cushion Matte 화보입니다.',
+        media: ['portre_10392.jpg', 'portre_9702r.jpg', 'portre_9820.jpg', 'portre_9833.jpg', 'portre_9903.jpg', 'portre_9913.jpg', 'portre_9983.jpg']
+          .map(fname => ({ type: 'image', src: 'uploads/velvet layer cushion matte/' + fname }))
+          .concat([{ type: 'image', src: 'uploads/IMG_4613.jpg' }]),
+      },
+      {
+        id: 'photo-13',
+        title: 'Shade & Shine Duo',
+        role: 'Concept: Fragments, Stitching, Light & Shadow',
+        company: 'PORTRÉ',
+        mediaType: 'photo',
+        isReal: true,
+        description: 'Fragments, Stitching, Light & Shadow 컨셉으로 진행한 Shade & Shine Duo 화보입니다.',
+        media: ['portre_1050.jpg', 'portre_1081.jpg', 'portre_1193.jpg', 'portre_1245.jpg', 'portre_1463.jpg', 'portre_1537r.jpg', 'portre_1561.jpg', 'portre_1588.jpg']
+          .map(fname => ({ type: 'image', src: 'uploads/shade & shine duo/' + fname })),
+      },
+      {
+        id: 'photo-14',
+        title: 'Satin Fit Liquid Cheek',
+        role: 'Concept: Moisture, Lovely, Smooth',
+        company: 'PORTRÉ',
+        mediaType: 'photo',
+        isReal: true,
+        description: 'Moisture, Lovely, Smooth 컨셉으로 진행한 Satin Fit Liquid Cheek 화보입니다.',
+        media: ['portre_5549r.jpg', 'portre_5555r.jpg', 'portre_5747r.jpg', 'portre_5971.jpg', 'portre_5987r.jpg', 'portre_6003r.jpg', 'portre_6037r.jpg', 'portre_6198.jpg', 'portre_18409.jpg', 'portre_18412.jpg', 'portre_18421.jpg', 'portre_18439.jpg']
+          .map(fname => ({ type: 'image', src: 'uploads/satin fit liquid cheek/' + fname }))
+          .concat([{ type: 'image', src: 'uploads/portre_6457.jpg' }, { type: 'image', src: 'uploads/portre_6460r.jpg' }]),
+      },
+      {
+        id: 'photo-15',
+        title: 'Hand Cream Nouveau',
+        role: 'Concept: Scent, Sentiment, Classic',
+        company: 'PORTRÉ',
+        mediaType: 'photo',
+        isReal: true,
+        description: 'Scent, Sentiment, Classic 컨셉으로 진행한 Hand Cream Nouveau 화보입니다.',
+        media: [
+          'portre_0007-brown.jpg', 'portre_0021.jpg', 'portre_0073.jpg', 'portre_0222r.jpg', 'portre_0278.jpg',
+          'portre_0314.jpg', 'portre_10140-pk.jpg', 'portre_7162r.jpg', 'portre_7192.jpg', 'portre_7229.jpg',
+          'portre_7434.jpg', 'portre_7526rr.jpg', 'portre_7545r.jpg', 'portre_7648.jpg', 'portre_7689r.jpg',
+          'portre_7719r.jpg', 'portre_9430r-blue.jpg', 'portre_9629r.jpg',
+        ].map(fname => ({ type: 'image', src: 'uploads/Hand Cream Nouveau/' + fname })),
+      },
+      {
+        id: 'photo-19',
+        title: 'Promotion',
+        role: 'Concept: Valentine, Chuseok, Holiday Season',
+        company: 'PORTRÉ',
+        mediaType: 'photo',
+        isReal: true,
+        description: '발렌타인, 추석, 홀리데이 등 시즌 및 프로모션별로 연출한 화보입니다.',
+        media: [
+          'portre_0565r.jpg', 'portre_0408.jpg', 'portre_0619r.jpg', 'portre_0360.jpg', 'portre_1345.jpg',
+          'portre_1369.jpg', 'portre_1391.jpg', 'portre_15203.jpg', 'portre_15227.jpg', 'portre_2226.jpg',
+          'portre_2237.jpg', 'portre_2289.jpg', 'portre_2354.jpg', 'portre_2376.jpg', 'portre_2495.jpeg',
+          'portre_2529.jpg', 'portre_2571.jpg', 'portre_2643.jpeg', 'portre_2647.jpg', 'portre_2729.jpg',
+          'portre_2773.jpg', 'portre_2816.jpg', 'portre_2897.jpg', 'portre_5013.jpeg', 'portre_5242.jpeg',
+          'portre_6723.jpg', 'portre_6762.jpg', 'portre_6874.jpg', 'portre_788.jpg', 'portre_833.jpg',
+          'portre_856.jpg', 'portre_875.jpg', 'portre_902_1.jpg', 'portre_916_1.jpg', 'portre_951.jpg', 'portre_986.jpg',
+        ].map(fname => ({ type: 'image', src: 'uploads/promotion/' + fname })),
+      },
+      {
+        id: 'photo-20',
+        title: 'Package',
+        role: 'Concept: Kakao Talk Gift Packaging',
+        company: 'PORTRÉ',
+        mediaType: 'photo',
+        isReal: true,
+        description: '카카오톡 선물하기 패키지를 연출한 화보입니다.',
+        media: [
+          'portre_0725.jpg', 'portre_0852.jpg', 'portre_0886.jpg', 'portre_1130.jpg', 'portre_1138.jpg',
+          'portre_1150.jpg', 'portre_1159.jpg', 'portre_1696.jpg', 'portre_1704.jpg', 'portre_1885_2.jpg',
+          'portre_1913_2.jpg', 'portre_1954_2.jpg', 'portre_3099.jpg', 'portre_3130.jpg', 'portre_5592_1.jpg', 'portre_5600.jpg',
+        ].map(fname => ({ type: 'image', src: 'uploads/package/' + fname })),
+      },
+      {
+        id: 'photo-21',
+        title: 'The Atelier',
+        role: 'Concept: PORTRÉ First Offline Store',
+        company: 'PORTRÉ',
+        mediaType: 'photo',
+        isReal: true,
+        description: '포트레 첫번째 오프라인 스토어 ‘디 아뜰리에’ 오픈 화보입니다.',
+        media: [
+          '260502_매장 오픈 클린샷 1.png', '260502_매장 오픈 클린샷 2.png', '260502_매장 오픈 클린샷 3.png', '260502_매장 오픈 클린샷 4.png',
+          '260502_매장 오픈 클린샷 5.png', '260502_매장 오픈 클린샷 6.png', '260502_매장 오픈 클린샷 7.png', '260502_매장 오픈 클린샷 8.png',
+          '260502_매장 오픈 클린샷 9.png', '260502_매장 오픈 클린샷 10.png',
+        ].map(fname => ({ type: 'image', src: 'uploads/The Atelier/' + fname })),
+      },
+    ].map(f => ({
+      ...f,
+      count: f.media.length,
+      isPlaceholder: false,
+      thumbEl: (() => {
+        const src = enc(f.media[0].src);
+        if (typeof src !== 'string') return null;
+        const mediaStyle = { width: '100%', height: '100%', objectFit: 'cover', display: 'block' };
+        return React.createElement('img', { src, alt: f.title, style: mediaStyle, loading: 'lazy', decoding: 'async' });
+      })(),
+      thumbStyle: {
+        width: '100%', aspectRatio: '3/4',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        overflow: 'hidden', background: 'oklch(93% 0.006 60)',
+      },
+      onOpen: () => this.setState({ archiveFolder: f.id }),
+    }));
+
+    const archiveFoldersAll = realAiFolders.concat(photoRealFolders).concat(videoRealFolders.map(f => ({
+      ...f,
+      count: f.media.length,
+      thumbEl: (() => {
+        const src = enc(f.media[0].src);
+        if (typeof src !== 'string') return null;
+        const videoStyle = { width: '100%', height: '100%', objectFit: 'cover', display: 'block' };
+        return React.createElement('video', { src, muted: true, autoPlay: true, loop: true, playsInline: true, preload: 'metadata', style: videoStyle });
+      })(),
+      thumbStyle: {
+        width: '100%', aspectRatio: '3/4',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        overflow: 'hidden', background: 'oklch(93% 0.006 60)',
+      },
+      onOpen: () => this.setState({ archiveFolder: f.id }),
+    }))).concat(generatedFolders);
+
+    const mediaLabels = { photo: 'PHOTO', video: 'VIDEO', ai: 'AI' };
+    const archiveCategoryTabs = mediaTypes.map(t => ({
+      id: t,
+      label: mediaLabels[t],
+      onClick: () => this.setState({ archiveCategory: t }),
+      style: {
+        fontFamily: sans, fontSize: '15px', fontWeight: 700, letterSpacing: '0.06em', cursor: 'pointer',
+        color: this.state.archiveCategory === t ? ink : faintInk,
+        borderBottom: this.state.archiveCategory === t ? '2px solid ' + ink : '2px solid transparent',
+        paddingBottom: '6px', background: 'none', border: 'none', borderBottomWidth: '2px',
+      },
+    }));
+
+    const archiveFolders = archiveFoldersAll.filter(f => f.mediaType === this.state.archiveCategory);
+    const activeFolder = archiveFoldersAll.find(f => f.id === this.state.archiveFolder) || null;
+    const archiveImages = activeFolder
+      ? (activeFolder.isReal
+          ? activeFolder.media.map((m, i) => ({
+              id: activeFolder.id + '-' + i,
+              isVideo: m.type === 'video',
+              isPhoto: m.type === 'image',
+              isReal: true,
+              isPlaceholder: false,
+              mediaEl: (() => {
+                const src = enc(m.src);
+                if (typeof src !== 'string') return null;
+                if (m.type === 'video') {
+                  const videoStyle = { width: '100%', height: '100%', objectFit: 'contain', display: 'block', background: '#000' };
+                  return React.createElement('video', { src, poster: m.poster ? enc(m.poster) : undefined, controls: true, style: videoStyle });
+                }
+                const imgStyle = { width: '100%', height: '100%', objectFit: 'cover', display: 'block' };
+                return React.createElement('img', { src, alt: activeFolder.title, style: imgStyle });
+              })(),
+              imgStyle: {
+                width: '100%', aspectRatio: '9/16', overflow: 'hidden',
+                background: 'oklch(93% 0.006 60)', position: 'relative',
+              },
+            }))
+          : Array.from({ length: activeFolder.count }, (_, i) => {
+              const isVideo = activeFolder.mediaType === 'video' || (activeFolder.mediaType === 'ai' && i % 2 === 1);
+              return {
+                id: activeFolder.id + '-' + i,
+                isVideo,
+                isPhoto: !isVideo,
+                isReal: false,
+                isPlaceholder: true,
+                imgStyle: {
+                  width: '100%', aspectRatio: '9/16', ...stripeBg(i * 9),
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                  position: 'relative',
+                },
+              };
+            }))
+      : [];
+    const projectDetailImages = Array.from({ length: 4 }, (_, i) => ({
+      id: 'pd-' + i,
+      imgStyle: {
+        width: '100%', aspectRatio: '4/5', ...stripeBg(i * 13),
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      },
+    }));
+
+    const jsmResume = {
+      company: 'JUNGSAEMMOOL',
+      title: 'IMC팀 · 사원 (2022.04 — 2024.08)',
+      overview: [
+        { label: '직무', value: 'IMC팀 · 사원' },
+        { label: '재직기간', value: '2022.04 — 2024.08' },
+      ],
+      sections: [
+        {
+          title: '1. 브랜드 전략 & 캠페인 기획',
+          items: [
+            '신제품 론칭 마케팅 전략 수립 및 운영',
+            'SNS 채널 운영 전략 및 커뮤니케이션 전략 수립',
+            '연간 브랜딩 캠페인 기획 및 운영 서포트',
+            '통합 캠페인 IMC 마케팅 기획 및 운영(TVC·옥외광고·버스광고·SNS·디지털·PR 통합) \n — 25–34 타겟 구매전환 7%↑, 업계 Best in Class 사례 선정',
+          ],
+        },
+        {
+          title: '2. 콘텐츠 마케팅',
+          items: [
+            '브랜드 채널 컨셉 기획 및 톤앤매너에 맞춘 SNS 콘텐츠 기획·제작',
+            'SS/FW 화보 및 서브 모델 비주얼 기획 및 제작',
+          ],
+        },
+        {
+          title: '3. 퍼포먼스 마케팅',
+          items: [
+            '채널 퍼포먼스 광고 기획 및 운영(인스타그램, 유튜브 등)',
+            '소재 다각화 및 목적별(트래픽/구매전환/리타겟팅) 채널 분배 전략 수립, 구매자 데이터 기반 리타겟팅 광고 집행 — 월평균 ROAS 406%, 최대 979% 달성',
+            '인플루언서 협업 기반 바이럴 마케팅 캠페인 진행(리딩군/서포터군 이원화 전략) — 콘텐츠 140건 배포, 조회수 2.3만 회 이상 달성, 카테고리 1위 기여',
+            '제휴 플랫폼 체험단 운영(화해, 글로우픽, 파우더룸 등)',
+          ],
+        },
+        {
+          title: '4. 오프라인 행사',
+          items: [
+            '브랜드 아트 프로젝트 시즌 5–8 기획 및 운영',
+            '전시 목적에 따른 프로그램 행사 기획 및 운영',
+            '글로벌 연계, 메이크업 프로그램 등 기타 행사 기획 및 운영',
+          ],
+        },
+        {
+          title: '5. PR/홍보',
+          items: [
+            '인플루언서 시딩용 제품 프레스킷 기획 및 제작',
+            '제품 협찬 및 VIP(셀럽·인플루언서) 커뮤니케이션',
+            '프레스 응대, 보도자료 작성 및 뉴스 클리핑 진행',
+          ],
+        },
+      ],
+    };
+    const portreResume = {
+      company: 'PORTRÉ',
+      title: '마케팅팀 · 대리 (2024.09 — 재직중)',
+      overview: [
+        { label: '직무', value: '마케팅팀 · 대리' },
+        { label: '재직기간', value: '2024.09 — 재직중' },
+      ],
+      sections: [
+        {
+          title: '1. 브랜드 전략 & 캠페인',
+          items: [
+            '브랜드 마케팅 전략 및 신제품 론칭 캠페인 기획·운영',
+            'SNS 채널 운영 및 커뮤니케이션 전략 수립',
+          ],
+        },
+        {
+          title: '2. 콘텐츠 마케팅',
+          items: [
+            '브랜드 톤앤매너 기반 SNS 콘텐츠 기획·제작',
+            'SS/FW 화보 및 제품 비주얼 디렉팅',
+            '월 2회 제품 촬영 기획 및 디렉팅',
+            '숏폼 콘텐츠 기획·촬영·편집',
+            '생성형 AI를 활용한 이미지·영상 콘텐츠 제작',
+            '콘텐츠 평균 도달 70만+ 기록, 브랜드 SNS 팔로워 1.7만 → 3.7만 성장',
+          ],
+        },
+        {
+          title: '3. 퍼포먼스 마케팅',
+          items: [
+            'Meta, 네이버 브랜드검색 등 퍼포먼스 광고 기획 및 운영',
+            '목표(트래픽·구매전환·리타겟팅) 기반 채널 운영 전략 수립',
+            '소재 A/B 테스트 및 광고 최적화 — 광고 ROAS 최대 1,000%+ 달성',
+          ],
+        },
+        {
+          title: '4. 바이럴·PR',
+          items: [
+            '인플루언서 캠페인 기획 및 운영',
+            '체험단 운영 및 협업 관리',
+            '프레스킷 기획·제작',
+            '제품 협찬 및 VIP 커뮤니케이션',
+            '보도자료 작성 및 PR 운영',
+          ],
+        },
+      ],
+    };
+    const careerResumes = { JUNGSAEMMOOL: jsmResume, 'PORTRÉ': portreResume };
+
+    const careerItems = [
+      { id: 'portre', company: 'PORTRÉ', role: '마케팅팀 · 대리', period: '2024.09 — 재직중' },
+      { id: 'jsm', company: 'JUNGSAEMMOOL', role: 'IMC팀 · 사원', period: '2022.04 — 2024.08' },
+    ].map(it => ({ ...it, onOpen: () => {
+      if (!this.state.careerUnlocked) {
+        this.setState({ showCareerLock: true, pendingCareerId: it.id, careerPasscodeInput: '', careerPasscodeError: false });
+      } else {
+        this.setState({ careerDetail: it.id });
+      }
+    } }));
+
+    const activeCareerId = this.state.careerDetail
+      ? careerItems.find(c => c.id === this.state.careerDetail)
+      : null;
+    const careerDetail = activeCareerId ? careerResumes[activeCareerId.company] : null;
+
+    const categoryItems = [
+      { en: 'BRAND CAMPAIGN', ko: '브랜드 캠페인' },
+      { en: 'VIRAL MARKETING', ko: '바이럴 마케팅' },
+      { en: 'PERFORMANCE MARKETING', ko: '퍼포먼스 마케팅' },
+      { en: 'CONTENT MARKETING', ko: '콘텐츠 마케팅' },
+    ];
+
+    const hover = this.state.hover;
+    const hoverProject = hover
+      ? (hover.side === 'left' ? leftCompany.projects[hover.idx] : rightCompany.projects[hover.idx])
+      : null;
+
+    const floatThumbSpecs = [
+      { src: 'uploads/portre_1274.jpg', left: '2%', top: '4%', w: '15%', ratio: '4/5', rot: -8, depth: 160 },
+      { src: 'uploads/the atelier.jpg', left: '20%', top: '2%', w: '11%', ratio: '1/1', rot: 5, depth: 220 },
+      { src: 'uploads/tint glow jour.jpeg', left: '38%', top: '1%', w: '13%', ratio: '4/5', rot: -4, depth: 110 },
+      { src: 'uploads/portre_2278.jpg', left: '68%', top: '2%', w: '19%', ratio: '4/5', rot: 7, depth: 190 },
+      { src: 'uploads/holiday edition.jpeg', left: '90%', top: '38%', w: '12%', ratio: '3/4', rot: -6, depth: 140 },
+      { src: 'uploads/hand cream.jpeg', left: '0%', top: '46%', w: '16%', ratio: '4/5', rot: 6, depth: 230 },
+      { src: 'uploads/promotion.jpeg', left: '14%', top: '68%', w: '14%', ratio: '3/4', rot: -7, depth: 175 },
+      { src: 'uploads/tint matte.jpeg', left: '48%', top: '58%', w: '17%', ratio: '4/5', rot: 4, depth: 260 },
+      { src: 'uploads/nail nouveau jus.jpg', left: '58%', top: '18%', w: '10%', ratio: '1/1', rot: -8, depth: 95 },
+      { src: 'uploads/portre_1374_2.jpg', left: '38%', top: '80%', w: '12%', ratio: '4/5', rot: 5, depth: 150 },
+      { src: 'uploads/portre_1409.jpg', left: '-4%', top: '22%', w: '11%', ratio: '4/5', rot: -4, depth: 200 },
+      { src: 'uploads/portre_1438.jpg', left: '92%', top: '10%', w: '9%', ratio: '1/1', rot: 6, depth: 85 },
+      { src: 'uploads/portre_1465_2.jpg', left: '4%', top: '86%', w: '9%', ratio: '4/5', rot: -5, depth: 165 },
+      { src: 'uploads/portre_1610.jpg', left: '24%', top: '30%', w: '8%', ratio: '1/1', rot: 4, depth: 240 },
+      { src: 'uploads/portre_2194.jpg', left: '62%', top: '84%', w: '10%', ratio: '4/5', rot: -6, depth: 115 },
+      { src: 'uploads/portre_2348.jpg', left: '84%', top: '72%', w: '9%', ratio: '4/5', rot: 5, depth: 180 },
+      { src: 'uploads/portre_2416.jpg', left: '52%', top: '4%', w: '8%', ratio: '1/1', rot: -4, depth: 250 },
+      { src: 'uploads/portre_2441.jpg', left: '32%', top: '52%', w: '9%', ratio: '4/5', rot: 6, depth: 90 },
+      { src: 'uploads/portre_2537.jpg', left: '-2%', top: '-2%', w: '12%', ratio: '1/1', rot: -5, depth: 195 },
+      { src: 'uploads/portre_4968-컬러수정.jpg', left: '46%', top: '16%', w: '9%', ratio: '4/5', rot: 4, depth: 125 },
+      { src: 'uploads/portre_5662_1.jpg', left: '96%', top: '90%', w: '11%', ratio: '4/5', rot: -6, depth: 185 },
+      { src: 'uploads/portre_brush-ai.jpg', left: '8%', top: '10%', w: '8%', ratio: '1/1', rot: 8, depth: 270 },
+      { src: 'uploads/portre_product-ai.jpg', left: '76%', top: '52%', w: '10%', ratio: '4/5', rot: -4, depth: 130 },
+      { src: 'uploads/package/portre_0725.jpg', left: '44%', top: '2%', w: '7%', ratio: '4/5', rot: -6, depth: 155 },
+      { src: 'uploads/The Atelier/260502_매장 오픈 클린샷 1.png', left: '4%', top: '30%', w: '22%', ratio: '4/5', rot: 4, depth: 245 },
+      { src: 'uploads/Pure Glacé/portre_6074.jpg', left: '86%', top: '20%', w: '13%', ratio: '4/5', rot: -5, depth: 105 },
+      { src: 'uploads/TINT GLOW JOUR/portre_4830r.jpg', left: '30%', top: '70%', w: '19%', ratio: '4/5', rot: 6, depth: 210 },
+      { src: 'uploads/pure layer cushion glow/portre_6701.jpg', left: '64%', top: '32%', w: '6%', ratio: '1/1', rot: -7, depth: 140 },
+      { src: 'uploads/Shadow Nouveau/portre_1113.jpg', left: '-2%', top: '62%', w: '10%', ratio: '4/5', rot: 5, depth: 235 },
+      { src: 'uploads/water fit skin tint/portre_1700.jpg', left: '54%', top: '76%', w: '8%', ratio: '1/1', rot: -4, depth: 100 },
+      { src: 'uploads/bare color balm/portre_3516.jpg', left: '96%', top: '58%', w: '9%', ratio: '4/5', rot: 7, depth: 260 },
+      { src: 'uploads/satin fit liquid cheek/portre_5971.jpg', left: '16%', top: '12%', w: '6%', ratio: '1/1', rot: -5, depth: 120 },
+      { src: 'uploads/blur fit powder cheek/portre_3018.jpg', left: '76%', top: '86%', w: '15%', ratio: '4/5', rot: 4, depth: 190 },
+      { src: 'uploads/velvet layer cushion matte/portre_9820.jpg', left: '48%', top: '38%', w: '7%', ratio: '1/1', rot: -6, depth: 215 },
+    ];
+
+    return {
+      showIntro: !this.state.introDone,
+      enterSite: () => { this.setState({ introFading: true }); setTimeout(() => this.setState({ introDone: true }), 500); },
+      introOverlayStyle: {
+        position: 'fixed', inset: 0, zIndex: 999, background: tone.bg,
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '24px',
+        cursor: 'pointer', opacity: this.state.introFading ? 0 : 1, transition: 'opacity 0.5s ease',
+      },
+      introNameStyle: { fontFamily: serif, fontStyle: 'italic', fontSize: 'clamp(36px, 6vw, 68px)', color: ink },
+      introEnterStyle: { fontFamily: sans, fontSize: '13px', letterSpacing: '0.16em', color: mutedInk, border: '1px solid ' + mutedInk, borderRadius: '999px', padding: '10px 22px' },
+      showCareerLock: this.state.showCareerLock,
+      careerPasscodeInput: this.state.careerPasscodeInput,
+      careerPasscodeError: this.state.careerPasscodeError,
+      onCareerPasscodeChange: (e) => this.setState({ careerPasscodeInput: e.target.value, careerPasscodeError: false }),
+      onCareerPasscodeKeyDown: (e) => { if (e.key === 'Enter') this.submitCareerPasscode(); },
+      submitCareerPasscode: () => this.submitCareerPasscode(),
+      cancelCareerPasscode: () => this.setState({ showCareerLock: false, pendingCareerId: null, careerPasscodeInput: '', careerPasscodeError: false }),
+      showProjectLock: this.state.showProjectLock,
+      passcodeInput: this.state.passcodeInput,
+      passcodeError: this.state.passcodeError,
+      onPasscodeChange: (e) => this.setState({ passcodeInput: e.target.value, passcodeError: false }),
+      onPasscodeKeyDown: (e) => { if (e.key === 'Enter') this.submitPasscode(); },
+      submitPasscode: () => this.submitPasscode(),
+      cancelPasscode: () => this.setState({ showProjectLock: false, passcodeInput: '', passcodeError: false }),
+      lockOverlayStyle: { position: 'fixed', inset: 0, zIndex: 998, background: 'rgba(0,0,0,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+      lockBoxStyle: { background: tone.bg, padding: '48px', borderRadius: '4px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', minWidth: '280px' },
+      lockLabelStyle: { fontFamily: sans, fontSize: '12px', letterSpacing: '0.16em', color: mutedInk },
+      lockInputStyle: { fontFamily: serif, fontSize: '28px', textAlign: 'center', letterSpacing: '0.3em', width: '160px', border: 'none', borderBottom: '1px solid ' + ink, background: 'transparent', color: ink, padding: '8px 0', outline: 'none' },
+      lockErrorStyle: { fontFamily: sans, fontSize: '11px', color: 'oklch(55% 0.15 25)' },
+      lockButtonRowStyle: { display: 'flex', gap: '12px', marginTop: '8px' },
+      lockSubmitStyle: { fontFamily: sans, fontSize: '12px', letterSpacing: '0.08em', color: tone.bg, background: ink, border: 'none', borderRadius: '999px', padding: '10px 22px', cursor: 'pointer' },
+      lockCancelStyle: { fontFamily: sans, fontSize: '12px', letterSpacing: '0.08em', color: mutedInk, background: 'none', border: '1px solid ' + faintInk, borderRadius: '999px', padding: '10px 22px', cursor: 'pointer' },
+      inkColor: ink,
+      pageIndex: this.state.page === 'home' ? '00' : '0' + (pages.findIndex(p => p.id === this.state.page) + 1) + '',
+      rootStyle: {
+        minHeight: '100vh',
+        width: '100%',
+        background: tone.bg,
+        color: ink,
+        fontFamily: sans,
+        display: 'flex',
+        flexDirection: 'column',
+      },
+      headerStyle: {
+        position: 'sticky',
+        top: 0,
+        zIndex: 50,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '28px 48px',
+        background: tone.bg,
+        borderBottom: '1px solid oklch(85% 0.006 60 / 0.6)',
+      },
+      brandMarkStyle: {
+        fontFamily: sans,
+        fontSize: '12px',
+        letterSpacing: '0.1em',
+        color: faintInk,
+        width: '80px',
+        cursor: 'pointer',
+      },
+      goHomeClick: () => this.setPage('home'),
+      navRowStyle: {
+        display: 'flex',
+        gap: '40px',
+        alignItems: 'center',
+      },
+
+      isHome: this.state.page === 'home',
+      isNotHome: this.state.page !== 'home',
+      homeBackButtonStyle: { position: 'fixed', top: '28px', left: '48px', zIndex: 40, fontFamily: sans, fontSize: '13px', color: mutedInk, cursor: 'pointer' },
+      isProjectList: this.state.page === 'project' && !this.state.projectDetail,
+      isProjectDetail: this.state.page === 'project' && !!this.state.projectDetail,
+      isProfileMain: this.state.page === 'profile' && !this.state.careerDetail,
+      isArchive: this.state.page === 'archive',
+      isArchiveList: this.state.page === 'archive' && !activeFolder,
+      isArchiveDetail: this.state.page === 'archive' && !!activeFolder,
+      archiveCategoryTabs,
+      archiveCategoryDesc: { photo: '비주얼 이미지 기획 및 제작', video: '영상 기획 및 편집', ai: '생성형 AI 이미지·영상 제작' }[this.state.archiveCategory] || '',
+      navItems,
+      leftCompany,
+      rightCompany,
+      archiveFolders,
+      activeFolder: activeFolder ? { ...activeFolder, subLabel: activeFolder.role ? activeFolder.company + ' — ' + activeFolder.role : activeFolder.company } : { title: '', role: '', company: '', num: '', description: '', subLabel: '' },
+      hasFolderDescription: !!(activeFolder && activeFolder.description),
+      archiveImages,
+      projectDetailImages,
+      closeArchiveFolder: () => this.setState({ archiveFolder: null }),
+      projectDetail: this.state.projectDetail || { title: '', role: '', company: '', num: '', description: '', results: [], images: [] },
+      hasResults: !!(this.state.projectDetail && this.state.projectDetail.results && this.state.projectDetail.results.length),
+      hasHeroImage: !!(this.state.projectDetail && this.state.projectDetail.images && this.state.projectDetail.images[0]),
+      heroImgEl: (() => {
+        const raw = this.state.projectDetail && this.state.projectDetail.images && this.state.projectDetail.images[0];
+        const s = raw ? enc(raw) : null;
+        return (typeof s === 'string') ? React.createElement('img', { src: s, alt: '', style: { width: '100%', height: '100%', objectFit: 'cover', display: 'block' } }) : null;
+      })(),
+      projectGridImages: (this.state.projectDetail && this.state.projectDetail.images && this.state.projectDetail.images.length > 1
+        ? this.state.projectDetail.images.slice(1)
+        : []
+      ).map((src, i) => {
+        const s = src ? enc(src) : null;
+        return { id: 'pdi-' + i, imgEl: (typeof s === 'string') ? React.createElement('img', { src: s, alt: '', style: { width: '100%', height: '100%', objectFit: 'cover', display: 'block' } }) : null };
+      }),
+      closeProjectDetail: () => this.setState({ projectDetail: null }),
+
+      activeTabProjects: activeTabCompany.projects.map(p => {
+        const encSrc = p.cardImage ? enc(p.cardImage) : null;
+        return {
+          ...p,
+          cardImgEl: (typeof encSrc === 'string') ? React.createElement('img', { src: encSrc, alt: '', style: { width: '100%', height: '100%', objectFit: 'cover', display: 'block' } }) : null,
+        };
+      }),
+      companyTabs,
+      h1Style: { fontFamily: serif, fontStyle: 'italic', fontSize: '44px', color: ink, margin: 0 },
+      projectHeadRowStyle: { display: 'flex', alignItems: 'baseline', gap: '32px', marginBottom: '40px', flexWrap: 'wrap' },
+      tabRowStyle: { display: 'flex', gap: '28px' },
+      scrollRowStyle: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '32px 24px' },
+      cardStyle: { flex: '0 0 260px', display: 'flex', flexDirection: 'column', gap: '14px', cursor: 'pointer' },
+      cardImgStyle: { width: '260px', aspectRatio: '4/5', backgroundColor: 'oklch(93% 0.006 60)' },
+      cardCaptionStyle: { display: 'flex', flexDirection: 'column', gap: '3px' },
+      cardNumStyle: { fontFamily: sans, fontSize: '11px', color: faintInk, letterSpacing: '0.08em' },
+      cardTitleStyle: { fontFamily: serif, fontSize: '18px', color: ink, lineHeight: 1.35, whiteSpace: 'pre-line' },
+      cardRoleStyle: { fontFamily: sans, fontSize: '11px', color: mutedInk, letterSpacing: '0.02em' },
+      projectPageStyle: {
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '24px',
+        padding: '64px 48px 96px',
+        animation: 'pf-fade-up 0.6s ease both',
+      },
+      colStyle: { display: 'flex', flexDirection: 'column', gap: '2px' },
+      colHeaderStyle: { display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '28px' },
+      colLabelStyle: { fontFamily: sans, fontSize: '12px', color: faintInk, letterSpacing: '0.12em' },
+      colTitleStyle: { fontFamily: serif, fontStyle: 'italic', fontSize: '30px', color: ink, letterSpacing: '0.01em' },
+      colSubStyle: { fontFamily: sans, fontSize: '12px', color: mutedInk, letterSpacing: '0.04em' },
+      rowStyle: {
+        display: 'flex',
+        alignItems: 'baseline',
+        gap: '14px',
+        padding: '16px 0',
+        borderBottom: '1px solid oklch(88% 0.006 60 / 0.7)',
+        cursor: 'pointer',
+      },
+      rowNumStyle: { fontFamily: sans, fontSize: '11px', color: faintInk, transition: 'color 0.3s ease', width: '18px' },
+      rowTitleStyle: { fontFamily: serif, fontSize: '22px', color: mutedInk, transition: 'color 0.35s ease, transform 0.35s ease', flex: 1 },
+      rowMetaStyle: { fontFamily: sans, fontSize: '11px', color: faintInk, letterSpacing: '0.04em', whiteSpace: 'nowrap' },
+
+      centerStageStyle: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '420px',
+      },
+      hasHover: !!hover,
+      noHover: !hover,
+      hoverKeyStr: hover ? hover.side + hover.idx : 'none',
+      hoverProject: hoverProject || { title: '', role: '', company: '' },
+      previewImgStyle: {
+        width: '100%',
+        aspectRatio: '4/5',
+        maxWidth: '340px',
+        ...stripeBg(hover ? hover.idx * 7 : 0),
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '10px',
+        animation: 'pf-fade 0.45s ease both',
+        textAlign: 'center',
+        padding: '20px',
+      },
+      previewLabelStyle: { fontFamily: serif, fontStyle: 'italic', fontSize: '22px', color: ink },
+      previewCaptionStyle: { fontFamily: 'monospace', fontSize: '11px', color: mutedInk, letterSpacing: '0.03em' },
+      idleStageStyle: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', animation: 'pf-fade 0.6s ease both' },
+      idleWordStyle: { fontFamily: serif, fontSize: '46px', fontStyle: 'italic', color: faintInk, letterSpacing: '0.02em' },
+      idleSubStyle: { fontFamily: sans, fontSize: '12px', color: faintInk, letterSpacing: '0.15em' },
+      onLeave: () => this.setState({ hover: null }),
+
+      profileContactStyle: { display: 'flex', gap: '32px', flexWrap: 'wrap', maxWidth: '900px', width: '100%', margin: '0 auto', padding: '20px 0', borderTop: '1px solid oklch(88% 0.006 60 / 0.7)', borderBottom: '1px solid oklch(88% 0.006 60 / 0.7)' },
+      profileContactItemStyle: { display: 'flex', flexDirection: 'column', gap: '2px', textDecoration: 'none', color: mutedInk },
+      profileContactLabelStyle: { fontFamily: sans, fontSize: '11px', letterSpacing: '0.1em', color: faintInk },
+      profileContactValueStyle: { fontFamily: serif, fontStyle: 'italic', fontSize: '18px', color: ink },
+      profilePageStyle: {
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '64px',
+        padding: '80px 48px 96px',
+        animation: 'pf-fade-up 0.6s ease both',
+      },
+      aboutPageStyle: {
+        display: 'flex',
+        justifyContent: 'center',
+        width: '100%',
+      },
+      aboutHeroStyle: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '32px', maxWidth: '900px', width: '100%', textAlign: 'center', margin: '0 auto' },
+      aboutEyebrowCenterStyle: { fontFamily: sans, fontSize: '12px', letterSpacing: '0.16em', color: mutedInk },
+      aboutHeroTitleStyle: { fontFamily: serif, fontStyle: 'italic', fontWeight: 500, fontSize: 'clamp(28px, 4vw, 46px)', lineHeight: 1.3, color: ink, margin: 0 },
+      aboutDividerStyle: { width: '100%', height: '1px', background: 'oklch(85% 0.006 60)' },
+      aboutHeroBodyStyle: { fontFamily: sans, fontSize: '16px', lineHeight: 1.9, color: mutedInk, margin: 0, maxWidth: '680px' },
+      aboutMetaRowStyle: { display: 'flex', gap: '48px', width: '100%', justifyContent: 'center', flexWrap: 'wrap', marginTop: '8px' },
+      aboutMetaColStyle: { display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '8px', minWidth: '180px' },
+      aboutMetaDividerStyle: { width: '100%', height: '1px', background: 'oklch(88% 0.006 60)', marginBottom: '4px' },
+      aboutMetaLabelStyle: { fontFamily: sans, fontSize: '11px', letterSpacing: '0.12em', color: faintInk },
+      aboutMetaValueStyle: { fontFamily: sans, fontSize: '15px', color: ink },
+      aboutMetaLinkStyle: { fontFamily: sans, fontSize: '15px', color: ink, textDecoration: 'none', display: 'block' },
+      careerSectionStyle: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '10px',
+        maxWidth: '900px',
+        width: '100%',
+        margin: '0 auto',
+      },
+      aboutLeftStyle: { display: 'flex', flexDirection: 'column', gap: '28px', maxWidth: '620px' },
+      eyebrowStyle: { fontFamily: sans, fontSize: '12px', letterSpacing: '0.16em', color: mutedInk },
+      quoteStyle: { fontFamily: serif, fontWeight: 500, fontSize: '42px', lineHeight: 1.25, color: ink, margin: 0 },
+      bodyTextStyle: { fontFamily: sans, fontSize: '15px', lineHeight: 1.8, color: mutedInk, margin: 0, maxWidth: '520px' },
+      tagRowStyle: { display: 'flex', gap: '10px', flexWrap: 'wrap' },
+      tagStyle: { fontFamily: sans, fontSize: '11px', letterSpacing: '0.06em', color: ink, border: '1px solid oklch(80% 0.006 60)', borderRadius: '999px', padding: '7px 14px' },
+      aboutTags: ['캠페인 기획', '콘텐츠 제작', '퍼포먼스 마케팅', 'AI 콘텐츠'],
+      aboutRightStyle: { display: 'flex', justifyContent: 'center' },
+      portraitStyle: { width: '100%', maxWidth: '360px', aspectRatio: '3/4', ...stripeBg(3), display: 'flex', alignItems: 'center', justifyContent: 'center' },
+      placeholderLabelStyle: { fontFamily: 'monospace', fontSize: '11px', color: mutedInk, letterSpacing: '0.05em' },
+
+      isCareerDetail: this.state.page === 'profile' && !!this.state.careerDetail,
+      careerItems,
+      careerRowStyle: {
+        display: 'flex',
+        alignItems: 'baseline',
+        gap: '24px',
+        padding: '28px 0',
+        borderBottom: '1px solid oklch(88% 0.006 60 / 0.7)',
+        cursor: 'pointer',
+      },
+      careerCompanyStyle: { fontFamily: serif, fontStyle: 'italic', fontSize: '32px', color: ink, width: '260px' },
+      careerRoleStyle: { fontFamily: sans, fontSize: '14px', color: mutedInk, flex: 1 },
+      careerPeriodStyle: { fontFamily: sans, fontSize: '13px', color: faintInk, letterSpacing: '0.03em' },
+      closeCareerDetail: () => this.setState({ careerDetail: null }),
+      careerDetail: careerDetail || { company: '', title: '', overview: [], sections: [] },
+
+      careerDetailPageStyle: {
+        flex: 1,
+        padding: '64px 48px 96px',
+        maxWidth: '820px',
+        margin: '0 auto',
+        width: '100%',
+        animation: 'pf-fade-up 0.6s ease both',
+      },
+      careerDetailHeaderStyle: { display: 'flex', flexDirection: 'column', gap: '6px', margin: '20px 0 32px' },
+      careerDetailCompanyStyle: { fontFamily: serif, fontStyle: 'italic', fontSize: '40px', color: ink },
+      careerDetailTitleStyle: { fontFamily: sans, fontSize: '14px', color: mutedInk, letterSpacing: '0.02em' },
+      overviewBoxStyle: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '10px',
+        padding: '24px 0',
+        borderTop: '1px solid oklch(88% 0.006 60 / 0.7)',
+        borderBottom: '1px solid oklch(88% 0.006 60 / 0.7)',
+        marginBottom: '40px',
+      },
+      overviewRowStyle: { display: 'flex', gap: '16px', fontFamily: sans, fontSize: '13px' },
+      overviewLabelStyle: { color: faintInk, width: '90px', flexShrink: 0, letterSpacing: '0.03em' },
+      overviewValueStyle: { color: mutedInk, lineHeight: 1.6 },
+      resumeSectionStyle: { marginBottom: '32px' },
+      resumeSectionTitleStyle: { fontFamily: serif, fontStyle: 'italic', fontSize: '20px', color: ink, marginBottom: '14px', display: 'block' },
+      resumeListStyle: { display: 'flex', flexDirection: 'column', gap: '10px', margin: 0, paddingLeft: '18px' },
+      resumeItemStyle: { fontFamily: sans, fontSize: '14px', lineHeight: 1.7, color: mutedInk },
+
+      // HOME
+      isHome: this.state.page === 'home',
+      goHome: () => this.setPage('home'),
+      homePageStyle: {
+        flex: 1,
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '760px',
+        overflow: 'hidden',
+        animation: 'pf-fade-up 0.6s ease both',
+      },
+      homeCenterStyle: { position: 'relative', zIndex: 5, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', textAlign: 'center' },
+      homeBrandStyle: {
+        fontFamily: serif,
+        fontStyle: 'italic',
+        fontWeight: 500,
+        fontSize: 'clamp(30px, 4.6vw, 60px)',
+        color: ink,
+        letterSpacing: '0.01em',
+      },
+      homeCenterCaptionStyle: { fontFamily: sans, fontSize: '12px', letterSpacing: '0.24em', color: mutedInk },
+      homeBottomNavStyle: {
+        marginTop: '18px',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', flexWrap: 'wrap',
+        fontFamily: sans, fontSize: '12px', letterSpacing: '0.14em', color: faintInk,
+      },
+      homeBottomLinkStyle: { fontFamily: sans, fontSize: '12px', letterSpacing: '0.14em', color: ink, textDecoration: 'none', fontWeight: 700 },
+      enterArchive: () => this.setPage('archive'),
+      enterAbout: () => this.setPage('profile'),
+      onHomeMouseMove: (e) => {
+        if (this._mouseRaf) return;
+        const clientX = e.clientX, clientY = e.clientY, target = e.currentTarget;
+        this._mouseRaf = requestAnimationFrame(() => {
+          this._mouseRaf = null;
+          const r = target.getBoundingClientRect();
+          this.setState({ mouseX: ((clientX - r.left) / r.width - 0.5) * 2, mouseY: ((clientY - r.top) / r.height - 0.5) * 2 });
+        });
+      },
+      floatThumbs: floatThumbSpecs.map((sp, i) => {
+        const s = enc(sp.src);
+        const mx = this.state.mouseX * sp.depth;
+        const my = this.state.mouseY * sp.depth;
+        return {
+          id: 'ft-' + i,
+          wrapStyle: {
+            position: 'absolute', left: sp.left, top: sp.top, width: sp.w, aspectRatio: sp.ratio,
+            transform: 'translate(' + mx + 'px, ' + my + 'px) rotate(' + sp.rot + 'deg)',
+            transition: 'transform 0.5s cubic-bezier(0.16,1,0.3,1)',
+            willChange: 'transform',
+            overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.25)', opacity: 0.95,
+          },
+          el: (typeof s === 'string') ? React.createElement('img', { src: s, alt: '', loading: i < 6 ? 'eager' : 'lazy', decoding: 'async', fetchPriority: i < 6 ? 'high' : 'low', style: { width: '100%', height: '100%', objectFit: 'cover', display: 'block' } }) : null,
+        };
+      }),
+      homeLeftLabel: 'JUNGSAEMMOOL',
+      homeRightLabel: 'PORTRÉ',
+      currentLeftCategory: categoryItems[this.state.homeIdx % categoryItems.length],
+      currentRightCategory: categoryItems[(this.state.homeIdx + 2) % categoryItems.length],
+      myName: 'Kim Woojeong',
+      homeKey: this.state.homeIdx,
+      enterProject: () => this.setPage('project'),
+
+      contactPageStyle: {
+        flex: 1,
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        padding: '64px 48px',
+        minHeight: '640px',
+        animation: 'pf-fade-up 0.6s ease both',
+      },
+      contactCornerStyle: { display: 'flex', flexDirection: 'column', gap: '18px', maxWidth: '280px' },
+      contactRows: [
+        { label: 'EMAIL', value: 'cocoship__@naver.com', href: 'mailto:cocoship__@naver.com' },
+        { label: 'INSTAGRAM', value: '@cocoship__', href: 'https://instagram.com/cocoship__' },
+      ],
+      contactRowStyle: { display: 'flex', flexDirection: 'column', gap: '2px', textDecoration: 'none', color: mutedInk, transition: 'color 0.3s ease' },
+      contactRowLabelStyle: { fontFamily: sans, fontSize: '11px', letterSpacing: '0.1em', color: faintInk },
+      contactRowValueStyle: { fontFamily: serif, fontStyle: 'italic', fontSize: '20px' },
+      talkGridStyle: {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gridTemplateRows: '1fr 1fr',
+        columnGap: '60px',
+        rowGap: '10px',
+      },
+      talkLetters: ['T', 'A', 'L', 'K'].map((ch, i) => ({
+        char: ch,
+        style: {
+          fontFamily: serif,
+          fontSize: 'clamp(70px, 12vw, 160px)',
+          color: ink,
+          lineHeight: 1,
+          textAlign: i % 2 === 0 ? 'right' : 'left',
+        },
+      })),
+      footerStyle: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '16px' },
+      footerCopyStyle: { fontFamily: sans, fontSize: '11px', color: faintInk, letterSpacing: '0.02em' },
+      footerLinksStyle: { display: 'flex', gap: '20px' },
+      footerLinkStyle: { fontFamily: sans, fontSize: '12px', color: mutedInk, textDecoration: 'none', letterSpacing: '0.04em' },
+
+      // ARCHIVE
+      archivePageStyle: {
+        flex: 1,
+        padding: '64px 48px 96px',
+        animation: 'pf-fade-up 0.6s ease both',
+      },
+      archiveHeaderStyle: { display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '40px' },
+      archiveTitleRowStyle: { display: 'flex', alignItems: 'baseline', gap: '32px', flexWrap: 'wrap' },
+      archiveCategoryTabRowStyle: { display: 'flex', gap: '28px' },
+      archiveCategoryDescStyle: { fontFamily: sans, fontSize: '12px', color: mutedInk, letterSpacing: '0.02em', display: 'block' },
+      archiveTitleStyle: { fontFamily: serif, fontStyle: 'italic', fontSize: '44px', color: ink },
+      archiveGridStyle: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+        gap: '28px',
+      },
+      folderCardStyle: { display: 'flex', flexDirection: 'column', gap: '12px', cursor: 'pointer' },
+      folderThumbLabelStyle: { fontFamily: 'monospace', fontSize: '10px', color: mutedInk },
+      folderCaptionStyle: { display: 'flex', flexDirection: 'column', gap: '2px' },
+      folderTitleStyle: { fontFamily: serif, fontStyle: 'italic', fontSize: '19px', color: ink },
+      folderMetaStyle: { fontFamily: sans, fontSize: '11px', color: faintInk, letterSpacing: '0.03em' },
+
+      archiveDetailHeaderStyle: { display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '36px' },
+      archiveDetailDescStyle: { fontFamily: sans, fontSize: '14px', lineHeight: 1.8, color: mutedInk, maxWidth: '640px', marginTop: '4px' },
+      realMediaTagStyle: { width: '100%', height: '100%', objectFit: 'cover', display: 'block' },
+      folderThumbMediaStyle: { width: '100%', height: '100%', objectFit: 'cover', display: 'block' },
+      backLinkStyle: { fontFamily: sans, fontSize: '12px', color: mutedInk, letterSpacing: '0.06em', cursor: 'pointer', textDecoration: 'none', border: 'none', background: 'none', padding: 0 },
+      archiveDetailImgGridStyle: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+        gap: '20px',
+      },
+      playIconStyle: {
+        width: '38px', height: '38px', borderRadius: '50%',
+        border: '1px solid ' + ink, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: '13px', color: ink,
+      },
+      // PROJECT DETAIL
+      projectDetailPageStyle: {
+        flex: 1,
+        padding: '64px 48px 96px',
+        maxWidth: '1000px',
+        margin: '0 auto',
+        width: '100%',
+        animation: 'pf-fade-up 0.6s ease both',
+      },
+      projectDetailHeroStyle: { width: '100%', aspectRatio: '16/8', overflow: 'hidden', ...stripeBg(11), display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '36px' },
+      projectDetailHeroImgStyle: { width: '100%', height: '100%', objectFit: 'cover', display: 'block' },
+      noProjectImages: !(this.state.projectDetail && this.state.projectDetail.images && this.state.projectDetail.images.length),
+      projectDetailImgWrapStyle: { width: '100%', aspectRatio: '4/5', overflow: 'hidden', backgroundColor: 'oklch(93% 0.006 60)' },
+      projectDetailImgTagStyle: { width: '100%', height: '100%', objectFit: 'cover', display: 'block' },
+      projectDetailMetaRowStyle: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '24px', flexWrap: 'wrap', marginBottom: '20px' },
+      projectDetailTitleStyle: { fontFamily: serif, fontStyle: 'italic', fontSize: '40px', color: ink, margin: 0 },
+      projectDetailTagStyle: { fontFamily: sans, fontSize: '12px', color: mutedInk, letterSpacing: '0.06em' },
+      projectDetailBodyStyle: { fontFamily: sans, fontSize: '15px', lineHeight: 1.8, color: mutedInk, maxWidth: '640px' },
+      resultsLabelStyle: { fontFamily: sans, fontSize: '12px', letterSpacing: '0.14em', color: faintInk, marginTop: '28px', display: 'block' },
+      resultsListStyle: { display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px', marginBottom: 0, paddingLeft: '18px', maxWidth: '640px' },
+      resultItemStyle: { fontFamily: sans, fontSize: '14px', lineHeight: 1.6, color: ink },
+      projectDetailGridStyle: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+        gap: '18px',
+        marginTop: '36px',
+      },
+    };
+  }
+}
+</script>
+</body>
+</html>
