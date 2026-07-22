@@ -32,6 +32,9 @@
     .pf-social:hover { color: {{ inkColor }} !important; }
     @media (max-width: 700px) {
       .pf-float-tile { display: none !important; }
+      .pf-header { padding: 16px 20px !important; }
+      .pf-nav-row { gap: 14px !important; }
+      .pf-nav-link { font-size: 10px !important; letter-spacing: 0.06em !important; }
     }
   </style>
 </helmet>
@@ -85,9 +88,9 @@
 
   <!-- NAV -->
   <sc-if value="{{ isNotHome }}" hint-placeholder-val="{{ false }}">
-    <header style="{{ headerStyle }}">
+    <header class="pf-header" style="{{ headerStyle }}">
       <div style="{{ brandMarkStyle }}" onClick="{{ goHomeClick }}">Portfolio</div>
-      <nav style="{{ navRowStyle }}">
+      <nav class="pf-nav-row" style="{{ navRowStyle }}">
         <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="4">
           <a href="#" onClick="{{ item.onClick }}" class="pf-nav-link" style="{{ item.style }}">{{ item.label }}</a>
         </sc-for>
