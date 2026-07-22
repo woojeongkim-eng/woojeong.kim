@@ -32,12 +32,18 @@
     .pf-social:hover { color: {{ inkColor }} !important; }
     .pf-float-wrap { position: absolute; inset: 0; }
     @media (max-width: 700px) {
-      .pf-float-wrap { transform: scale(0.55); transform-origin: center; }
+      .pf-float-wrap { transform: scale(0.92); transform-origin: center; }
       .pf-header { padding: 16px 20px !important; }
       .pf-nav-row { gap: 14px !important; }
       .pf-nav-link { font-size: 10px !important; letter-spacing: 0.06em !important; }
       .pf-page { padding: 32px 20px 64px !important; }
       .pf-big-title { font-size: 28px !important; overflow-wrap: break-word !important; }
+      .pf-about-title { font-size: 20px !important; line-height: 1.5 !important; }
+      .pf-about-body { font-size: 13px !important; line-height: 1.7 !important; }
+      .pf-career-row { gap: 10px !important; padding: 16px 0 !important; }
+      .pf-career-company { font-size: 16px !important; width: auto !important; flex-shrink: 0 !important; }
+      .pf-career-role { font-size: 11px !important; }
+      .pf-career-period { font-size: 9px !important; flex-shrink: 0 !important; }
     }
   </style>
 </helmet>
@@ -187,9 +193,9 @@
     <main key="profile" class="pf-page" style="{{ profilePageStyle }}">
       <div style="{{ aboutHeroStyle }}">
         <span style="{{ aboutEyebrowCenterStyle }}">ABOUT</span>
-        <h1 style="{{ aboutHeroTitleStyle }}">전략적 사고와 크리에이티브 감각으로,<br>브랜드를 성장시킵니다.</h1>
+        <h1 class="pf-about-title" style="{{ aboutHeroTitleStyle }}">전략적 사고와 크리에이티브 감각으로,<br>브랜드를 성장시킵니다.</h1>
         <div style="{{ aboutDividerStyle }}"></div>
-        <p style="{{ aboutHeroBodyStyle }}">
+        <p class="pf-about-body" style="{{ aboutHeroBodyStyle }}">
           브랜드 전략부터 콘텐츠, 퍼포먼스 마케팅까지 전 과정을 경험하며 브랜드 성장을 이끌어왔습니다.
 <br>&nbsp;데이터 기반 전략과 크리에이티브를 바탕으로 성과를 만들고, 생성형 AI를 활용한 콘텐츠 제작까지 <br>역량을 확장하고 있습니다.
         </p>
@@ -217,10 +223,10 @@
       <div style="{{ careerSectionStyle }}">
         <span style="{{ eyebrowStyle }}">CAREER</span>
         <sc-for list="{{ careerItems }}" as="job" hint-placeholder-count="2">
-          <div class="pf-row" style="{{ careerRowStyle }}" onClick="{{ job.onOpen }}">
-            <span style="{{ careerCompanyStyle }}">{{ job.company }}</span>
-            <span style="{{ careerRoleStyle }}">{{ job.role }}</span>
-            <span style="{{ careerPeriodStyle }}">{{ job.period }}</span>
+          <div class="pf-row pf-career-row" style="{{ careerRowStyle }}" onClick="{{ job.onOpen }}">
+            <span class="pf-career-company" style="{{ careerCompanyStyle }}">{{ job.company }}</span>
+            <span class="pf-career-role" style="{{ careerRoleStyle }}">{{ job.role }}</span>
+            <span class="pf-career-period" style="{{ careerPeriodStyle }}">{{ job.period }}</span>
           </div>
         </sc-for>
       </div>
