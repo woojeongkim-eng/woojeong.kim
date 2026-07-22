@@ -30,6 +30,9 @@
     .pf-row:hover .pf-row-num { color: {{ inkColor }}; }
     .pf-nav-link:hover { opacity: 1 !important; }
     .pf-social:hover { color: {{ inkColor }} !important; }
+    @media (max-width: 700px) {
+      .pf-float-tile { display: none !important; }
+    }
   </style>
 </helmet>
 <template id="__bundler_thumbnail">
@@ -97,7 +100,7 @@
   <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
     <main key="home" style="{{ homePageStyle }}" onMouseMove="{{ onHomeMouseMove }}">
       <sc-for list="{{ floatThumbs }}" as="th" hint-placeholder-count="35">
-        <div style="{{ th.wrapStyle }}">{{ th.el }}</div>
+        <div class="pf-float-tile" style="{{ th.wrapStyle }}">{{ th.el }}</div>
       </sc-for>
 
       <div style="{{ homeCenterStyle }}">
