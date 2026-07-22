@@ -1300,6 +1300,31 @@ class Component extends DCLogic {
       { src: 'uploads/velvet layer cushion matte/portre_9820.jpg', left: '48%', top: '38%', w: '7%', ratio: '1/1', rot: -6, depth: 215 },
     ];
 
+    const isMobileW = typeof window !== 'undefined' && window.innerWidth <= 700;
+    let mobileFloatLayout = null;
+    if (isMobileW) {
+      const raw = floatThumbSpecs.map(sp => ({ left: parseFloat(sp.left), top: parseFloat(sp.top), w: parseFloat(sp.w) * 1.55 }));
+      const minL = Math.min(...raw.map(r => r.left)), maxL = Math.max(...raw.map(r => r.left));
+      const minT = Math.min(...raw.map(r => r.top)), maxT = Math.max(...raw.map(r => r.top));
+      const spreadL = (l) => ((l - minL) / (maxL - minL)) * 90 - 5;
+      const spreadT = (t) => ((t - minT) / (maxT - minT)) * 90 - 5;
+      const zone = { l: 22, r: 78, t: 34, b: 66 };
+      mobileFloatLayout = raw.map(r => {
+        let left = spreadL(r.left), top = spreadT(r.top);
+        const w = r.w;
+        const cx = left + w / 2, cy = top + w / 2;
+        if (cx > zone.l && cx < zone.r && cy > zone.t && cy < zone.b) {
+          const distLeft = cx - zone.l, distRight = zone.r - cx, distTop = cy - zone.t, distBottom = zone.b - cy;
+          const minDist = Math.min(distLeft, distRight, distTop, distBottom);
+          if (minDist === distLeft) left = zone.l - w - 2;
+          else if (minDist === distRight) left = zone.r + 2;
+          else if (minDist === distTop) top = zone.t - w - 2;
+          else top = zone.b + 2;
+        }
+        return { left: left + '%', top: top + '%', w: w + '%' };
+      });
+    }
+
     return {
       showIntro: !this.state.introDone,
       enterSite: () => { this.setState({ introFading: true }); setTimeout(() => this.setState({ introDone: true }), 500); },
@@ -1624,11 +1649,10 @@ class Component extends DCLogic {
         const s = enc(sp.src);
         const mx = this.state.mouseX * sp.depth;
         const my = this.state.mouseY * sp.depth;
-        const isMobileW = typeof window !== 'undefined' && window.innerWidth <= 700;
-        const leftPct = parseFloat(sp.left), topPct = parseFloat(sp.top), wPct = parseFloat(sp.w);
-        const left = isMobileW ? (50 + (leftPct - 50) * 0.6) + '%' : sp.left;
-        const top = isMobileW ? (50 + (topPct - 50) * 0.75) + '%' : sp.top;
-        const w = isMobileW ? (wPct * 1.9) + '%' : sp.w;
+        const m = mobileFloatLayout && mobileFloatLayout[i];
+        const left = m ? m.left : sp.left;
+        const top = m ? m.top : sp.top;
+        const w = m ? m.w : sp.w;
         return {
           id: 'ft-' + i,
           wrapStyle: {
