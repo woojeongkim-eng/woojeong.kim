@@ -1273,15 +1273,21 @@ class Component extends DCLogic {
               mediaEl: (() => {
                 const src = enc(m.src);
                 if (typeof src !== 'string') return null;
+                const onWideLoad = (e) => {
+                  const el = e.currentTarget;
+                  if (el.naturalWidth > el.naturalHeight && el.parentElement) {
+                    el.parentElement.style.gridColumn = 'span 2';
+                  }
+                };
                 if (m.type === 'video') {
                   const videoStyle = { width: '100%', height: 'auto', display: 'block', background: '#000' };
-                  return React.createElement('video', { src, poster: m.poster ? enc(m.poster) : undefined, controls: true, style: videoStyle });
+                  return React.createElement('video', { src, poster: m.poster ? enc(m.poster) : undefined, controls: true, style: videoStyle, onLoadedMetadata: onWideLoad });
                 }
                 const imgStyle = { width: '100%', height: 'auto', display: 'block' };
-                return React.createElement('img', { src, alt: activeFolder.title, style: imgStyle });
+                return React.createElement('img', { src, alt: activeFolder.title, style: imgStyle, onLoad: onWideLoad });
               })(),
               imgStyle: {
-                width: '100%',
+                width: '100%', alignSelf: 'start',
                 background: 'oklch(93% 0.006 60)', position: 'relative',
               },
             }))
