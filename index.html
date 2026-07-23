@@ -607,7 +607,7 @@ class Component extends DCLogic {
     const allRaw = jungsaemmoolRaw.map(it => ({ ...it, company: 'JUNGSAEMMOOL' }))
       .concat(portreRaw.map(it => ({ ...it, company: 'PORTRÉ' })));
 
-    const mediaTypes = ['photo', 'video', 'ai'];
+    const mediaTypes = ['model', 'photo', 'video', 'ai'];
     const enc = (p) => this.state.mediaReady ? encodeURI(p.normalize('NFD')) : undefined;
     const realAiFolders = [
       {
@@ -1058,7 +1058,179 @@ class Component extends DCLogic {
       onOpen: () => this.setState({ archiveFolder: f.id }),
     }));
 
-    const archiveFoldersAll = realAiFolders.concat(photoRealFolders).concat(videoRealFolders.map(f => ({
+    const realModelFolders = [
+      {
+        id: 'model-7',
+        title: 'Soft Filter Powder Pact',
+        role: 'Model Visual',
+        company: 'PORTRÉ',
+        mediaType: 'model',
+        isReal: true,
+        description: 'Soft Filter Powder Pact 모델 화보입니다.',
+        media: ['soft-filter-powder-pact-01.jpg', 'soft-filter-powder-pact-02.jpg', 'soft-filter-powder-pact-03.jpg', 'soft-filter-powder-pact-04.jpg', 'soft-filter-powder-pact-05.jpg']
+          .map(fname => ({ type: 'image', src: 'uploads/model/' + fname })),
+      },
+      {
+        id: 'model-6',
+        title: 'Soft Dessin Duo',
+        role: 'Model Visual',
+        company: 'PORTRÉ',
+        mediaType: 'model',
+        isReal: true,
+        description: 'Soft Dessin Duo 모델 화보입니다.',
+        media: ['soft-dessin-duo-1.jpg', 'soft-dessin-duo-2.jpg', 'soft-dessin-duo-3.jpg', 'soft-dessin-duo-4.jpg', 'soft-dessin-duo-5.jpg', 'soft-dessin-duo-6.jpg']
+          .map(fname => ({ type: 'image', src: 'uploads/model/' + fname })),
+      },
+      {
+        id: 'model-10',
+        title: 'Tint Glow Jour',
+        role: 'Model Visual',
+        company: 'PORTRÉ',
+        mediaType: 'model',
+        isReal: true,
+        description: 'Tint Glow Jour 모델 화보입니다.',
+        media: ['tint-glow-jour-01.jpg', 'tint-glow-jour-02.jpg', 'tint-glow-jour-3.jpg', 'tint-glow-jour-4.jpg', 'tint-glow-jour-5.jpg']
+          .map(fname => ({ type: 'image', src: 'uploads/model/' + fname })),
+      },
+      {
+        id: 'model-5',
+        title: 'Shadow Nouveau',
+        role: 'Model Visual',
+        company: 'PORTRÉ',
+        mediaType: 'model',
+        isReal: true,
+        description: 'Shadow Nouveau 모델 화보입니다.',
+        media: ['shadow-nouveau-3.jpg', 'shadow-nouveau-4.jpg', 'shadow-nouveau-5.jpg', 'shadow-nouveau-6.jpg', 'shadow-nouveau-7.jpg', 'shadow-nouveau-8.jpg', 'shadow-nouveau-9.jpg', 'shadow-nouveau-10.jpg', 'shadow-nouveau-11.jpg', 'shadow-nouveau-12.jpg']
+          .map(fname => ({ type: 'image', src: 'uploads/model/' + fname })),
+      },
+      {
+        id: 'model-9',
+        title: 'Water Fit Skin Tint',
+        role: 'Model Visual',
+        company: 'PORTRÉ',
+        mediaType: 'model',
+        isReal: true,
+        description: 'Water Fit Skin Tint 모델 화보입니다.',
+        media: ['water-fit-skin-tint-1.jpg', 'water-fit-skin-tint-2.jpg', 'water-fit-skin-tint-3.jpg', 'water-fit-skin-tint-4.jpg', 'water-fit-skin-tint-5.jpg', 'water-fit-skin-tint-6.jpg']
+          .map(fname => ({ type: 'image', src: 'uploads/model/' + fname })),
+      },
+      {
+        id: 'model-1',
+        title: 'Bare Color Balm AD',
+        role: 'Model Visual',
+        company: 'PORTRÉ',
+        mediaType: 'model',
+        isReal: true,
+        description: 'Bare Color Balm AD 모델 화보입니다.',
+        media: ['bare-color-balm-ad-1.jpg', 'bare-color-balm-ad-2.jpg', 'bare-color-balm-ad-3.jpg', 'bare-color-balm-ad-4.jpg', 'bare-color-balm-ad-5.jpg']
+          .map(fname => ({ type: 'image', src: 'uploads/model/' + fname })),
+      },
+      {
+        id: 'model-14',
+        title: 'Nail Nouveau Jus - Holiday Edition',
+        role: 'Model Visual',
+        company: 'PORTRÉ',
+        mediaType: 'model',
+        isReal: true,
+        description: 'Nail Nouveau Jus Holiday Edition 모델 화보입니다.',
+        media: ['nail-nouveau-jus-holiday-edition-1.jpg', 'nail-nouveau-jus-holiday-edition-2.jpg', 'nail-nouveau-jus-holiday-edition-4.jpg']
+          .map(fname => ({ type: 'image', src: 'uploads/model/' + fname })),
+      },
+      {
+        id: 'model-11',
+        title: 'Tint Matte',
+        role: 'Model Visual',
+        company: 'PORTRÉ',
+        mediaType: 'model',
+        isReal: true,
+        description: 'Tint Matte 모델 화보입니다.',
+        media: ['tint-matte-01.jpg', 'tint-matte-02.jpg', 'tint-matte-03.jpg', 'tint-matte-04.jpg', 'tint-matte-05.jpg']
+          .map(fname => ({ type: 'image', src: 'uploads/model/' + fname })),
+      },
+      {
+        id: 'model-3',
+        title: 'Blur Fit Powder Cheek',
+        role: 'Model Visual',
+        company: 'PORTRÉ',
+        mediaType: 'model',
+        isReal: true,
+        description: 'Blur Fit Powder Cheek 모델 화보입니다.',
+        media: ['blur-fit-powder-cheek-01.jpg', 'blur-fit-powder-cheek-02.jpg', 'blur-fit-powder-cheek-03.jpg', 'blur-fit-powder-cheek-04.jpg', 'blur-fit-powder-cheek-05.jpg', 'blur-fit-powder-cheek-06.jpg', 'blur-fit-powder-cheek-07.jpg']
+          .map(fname => ({ type: 'image', src: 'uploads/model/' + fname })),
+      },
+      {
+        id: 'model-2',
+        title: 'Velvet Layer Cushion Matte',
+        role: 'Model Visual',
+        company: 'PORTRÉ',
+        mediaType: 'model',
+        isReal: true,
+        description: 'Velvet Layer Cushion Matte 모델 화보입니다.',
+        media: ['velvet-layer-cushion-matte-01.jpg', 'velvet-layer-cushion-matte-02.jpg', 'velvet-layer-cushion-matte-03.jpg']
+          .map(fname => ({ type: 'image', src: 'uploads/model/' + fname })),
+      },
+      {
+        id: 'model-8',
+        title: 'Shade & Shine Duo',
+        role: 'Model Visual',
+        company: 'PORTRÉ',
+        mediaType: 'model',
+        isReal: true,
+        description: 'Shade & Shine Duo 모델 화보입니다.',
+        media: ['shade-shine-duo-01.jpg', 'shade-shine-duo-02.jpg', 'shade-shine-duo-03.jpg']
+          .map(fname => ({ type: 'image', src: 'uploads/model/' + fname })),
+      },
+      {
+        id: 'model-4',
+        title: 'Satin Fit Liquid Cheek',
+        role: 'Model Visual',
+        company: 'PORTRÉ',
+        mediaType: 'model',
+        isReal: true,
+        description: 'Satin Fit Liquid Cheek 모델 화보입니다.',
+        media: ['satin-fit-liquid-cheek-01.jpg', 'satin-fit-liquid-cheek-02.jpg', 'satin-fit-liquid-cheek-03.jpg', 'satin-fit-liquid-cheek-04.jpg']
+          .map(fname => ({ type: 'image', src: 'uploads/model/' + fname })),
+      },
+      {
+        id: 'model-13',
+        title: 'Pure Layer Cushion Glow',
+        role: 'Model Visual',
+        company: 'PORTRÉ',
+        mediaType: 'model',
+        isReal: true,
+        description: 'Pure Layer Cushion Glow 모델 화보입니다.',
+        media: ['pure-layer-cushion-glow-01.jpg', 'pure-layer-cushion-glow-02.jpg', 'pure-layer-cushion-glow-03.jpg', 'pure-layer-cushion-glow-04.jpg', 'pure-layer-cushion-glow-05.jpg']
+          .map(fname => ({ type: 'image', src: 'uploads/model/' + fname })),
+      },
+      {
+        id: 'model-12',
+        title: 'Pure Glacé',
+        role: 'Model Visual',
+        company: 'PORTRÉ',
+        mediaType: 'model',
+        isReal: true,
+        description: 'Pure Glacé 모델 화보입니다.',
+        media: ['pure-glace-01.jpg', 'pure-glace-02.jpg']
+          .map(fname => ({ type: 'image', src: 'uploads/model/' + fname })),
+      },
+    ].map(f => ({
+      ...f,
+      count: f.media.length,
+      isPlaceholder: false,
+      thumbEl: (() => {
+        const src = enc(f.media[0].src);
+        if (typeof src !== 'string') return null;
+        const mediaStyle = { width: '100%', height: '100%', objectFit: 'cover', display: 'block' };
+        return React.createElement('img', { src, alt: f.title, style: mediaStyle, loading: 'lazy', decoding: 'async' });
+      })(),
+      thumbStyle: {
+        width: '100%', aspectRatio: '3/4',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        overflow: 'hidden', background: 'oklch(93% 0.006 60)',
+      },
+      onOpen: () => this.setState({ archiveFolder: f.id }),
+    }));
+    const archiveFoldersAll = realAiFolders.concat(photoRealFolders).concat(realModelFolders).concat(videoRealFolders.map(f => ({
       ...f,
       count: f.media.length,
       thumbEl: (() => {
@@ -1075,7 +1247,7 @@ class Component extends DCLogic {
       onOpen: () => this.setState({ archiveFolder: f.id }),
     }))).concat(generatedFolders);
 
-    const mediaLabels = { photo: 'PHOTO', video: 'VIDEO', ai: 'AI' };
+    const mediaLabels = { photo: 'PHOTO', model: 'MODEL', video: 'VIDEO', ai: 'AI' };
     const archiveCategoryTabs = mediaTypes.map(t => ({
       id: t,
       label: mediaLabels[t],
@@ -1405,7 +1577,7 @@ class Component extends DCLogic {
       isArchiveList: this.state.page === 'archive' && !activeFolder,
       isArchiveDetail: this.state.page === 'archive' && !!activeFolder,
       archiveCategoryTabs,
-      archiveCategoryDesc: { photo: '비주얼 이미지 기획 및 제작', video: '영상 기획 및 편집', ai: '생성형 AI 이미지·영상 제작' }[this.state.archiveCategory] || '',
+      archiveCategoryDesc: { photo: '비주얼 이미지 기획 및 제작', model: '모델 화보 기획 및 제작', video: '영상 기획 및 편집', ai: '생성형 AI 이미지·영상 제작' }[this.state.archiveCategory] || '',
       navItems,
       leftCompany,
       rightCompany,
