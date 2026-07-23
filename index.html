@@ -1045,7 +1045,7 @@ class Component extends DCLogic {
       count: f.media.length,
       isPlaceholder: false,
       thumbEl: (() => {
-        const src = enc(f.media[0].src);
+        const src = enc(f.previewImage || f.media[0].src);
         if (typeof src !== 'string') return null;
         const mediaStyle = { width: '100%', height: '100%', objectFit: 'cover', display: 'block' };
         return React.createElement('img', { src, alt: f.title, style: mediaStyle, loading: 'lazy', decoding: 'async' });
@@ -1218,7 +1218,7 @@ class Component extends DCLogic {
       count: f.media.length,
       isPlaceholder: false,
       thumbEl: (() => {
-        const src = enc(f.media[0].src);
+        const src = enc(f.previewImage || f.media[0].src);
         if (typeof src !== 'string') return null;
         const mediaStyle = { width: '100%', height: '100%', objectFit: 'cover', display: 'block' };
         return React.createElement('img', { src, alt: f.title, style: mediaStyle, loading: 'lazy', decoding: 'async' });
@@ -1234,7 +1234,7 @@ class Component extends DCLogic {
       ...f,
       count: f.media.length,
       thumbEl: (() => {
-        const src = enc(f.media[0].src);
+        const src = enc(f.previewImage || f.media[0].src);
         if (typeof src !== 'string') return null;
         const videoStyle = { width: '100%', height: '100%', objectFit: 'cover', display: 'block' };
         return React.createElement('video', { src, muted: true, autoPlay: true, loop: true, playsInline: true, preload: 'metadata', style: videoStyle });
@@ -1274,14 +1274,14 @@ class Component extends DCLogic {
                 const src = enc(m.src);
                 if (typeof src !== 'string') return null;
                 if (m.type === 'video') {
-                  const videoStyle = { width: '100%', height: '100%', objectFit: 'contain', display: 'block', background: '#000' };
+                  const videoStyle = { width: '100%', height: 'auto', display: 'block', background: '#000' };
                   return React.createElement('video', { src, poster: m.poster ? enc(m.poster) : undefined, controls: true, style: videoStyle });
                 }
-                const imgStyle = { width: '100%', height: '100%', objectFit: 'cover', display: 'block' };
+                const imgStyle = { width: '100%', height: 'auto', display: 'block' };
                 return React.createElement('img', { src, alt: activeFolder.title, style: imgStyle });
               })(),
               imgStyle: {
-                width: '100%', aspectRatio: '9/16', overflow: 'hidden',
+                width: '100%',
                 background: 'oklch(93% 0.006 60)', position: 'relative',
               },
             }))
