@@ -1,12 +1,17 @@
 import * as THREE from 'three';
 
-// Home page main element: a big rotating 3D cylinder, its curved surface
-// wrapped with the Profile / Project / Archive photos (120° of the drum
-// each), with a bottom control bar (thumbnail + label + prev/next) and
-// drag-to-spin. Built once and appended to document.body — outside the
-// framework's re-rendered component tree (the home page re-renders on a
-// timer and tears down anything mounted inside it; see prior history).
-// Position is synced every frame to the `.pf-float-wrap` placeholder div.
+// Home page main element: Profile / Project / Archive, browsable two ways
+// via a CIRCLE / LINE toggle —
+//   circle: a real 3D cylinder (Three.js), its curved surface wrapped with
+//           the 3 photos (120° of the drum each), each with its category
+//           label baked onto the image itself; drag or the bottom
+//           prev/next arrows spin it.
+//   line:   the same 3 photos as flat cards in a row, dragged/panned
+//           horizontally, label on each card.
+// Built once and appended to document.body — outside the framework's
+// re-rendered component tree (the home page re-renders on a timer and
+// tears down anything mounted inside it; see prior history). Position is
+// synced every frame to the `.pf-float-wrap` placeholder div.
 //
 // Navigation reuses the site's own page-routing logic (including the
 // Project passcode gate) via the hidden `[data-nav-id]` proxy links
@@ -21,18 +26,22 @@ const N = ITEMS.length;
 const SANS = "'Archivo', Helvetica, Arial, sans-serif";
 const SERIF = "'Cormorant Garamond', Georgia, serif";
 
-let renderer = null, scene = null, camera = null, group = null;
-let canvasEl = null, root = null, labelEl = null, barEl = null, thumbEl = null, barLabelEl = null;
+let renderer = null, scene = null, camera = null, group = null, canvasEl = null;
+let root = null, barEl = null, thumbEl = null, barLabelEl = null, modeToggleEl = null;
+let lineWrapEl = null, cardEls = [];
 let raf = null, built = false;
 
 const state = {
+  mode: 'circle', // 'circle' | 'line'
   activeIndex: 0,
   dragging: false,
   dragStartX: 0,
   dragDelta: 0,
   moved: false,
   visible: false,
-  rotY: 0, // settled rotation (radians)
+  rotY: 0, // circle mode: settled rotation (radians)
+  cardW: 260,
+  cardH: 173,
 };
 
 function anglePerItem() {
@@ -43,6 +52,8 @@ function navigateTo(id) {
   const link = document.querySelector(`[data-nav-id="${id}"]`);
   if (link) link.click();
 }
+
+// ---------- circle (3D cylinder) ----------
 
 function buildScene() {
   scene = new THREE.Scene();
@@ -58,10 +69,9 @@ function buildScene() {
   group = new THREE.Group();
   scene.add(group);
 
-  const radius = 460;
-  const height = radius * 1.6;
-  const loader = new THREE.TextureLoader();
-  const gap = 0.018; // small radian gap between panels
+  const radius = 190;
+  const height = radius * 1.55;
+  const gap = 0.02;
 
   ITEMS.forEach((item, i) => {
     const thetaStart = i * anglePerItem() + gap / 2;
@@ -71,14 +81,35 @@ function buildScene() {
     const mesh = new THREE.Mesh(geo, mat);
     group.add(mesh);
 
-    loader.load(item.img, (tex) => {
+    // Category label baked onto the image itself (canvas-composited),
+    // matching the reference: text sits inside the photo, not floating
+    // separately over the whole scene.
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const cw = img.naturalWidth, ch = img.naturalHeight;
+      const c = document.createElement('canvas');
+      c.width = cw; c.height = ch;
+      const ctx = c.getContext('2d');
+      ctx.drawImage(img, 0, 0, cw, ch);
+      const grad = ctx.createLinearGradient(0, ch * 0.55, 0, ch);
+      grad.addColorStop(0, 'rgba(0,0,0,0)');
+      grad.addColorStop(1, 'rgba(0,0,0,0.45)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, ch * 0.55, cw, ch * 0.45);
+      ctx.fillStyle = 'rgba(255,255,255,0.96)';
+      ctx.font = `italic ${Math.round(ch * 0.13)}px Georgia, serif`;
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillText(item.label.charAt(0) + item.label.slice(1).toLowerCase(), cw * 0.06, ch * 0.9);
+      const tex = new THREE.CanvasTexture(c);
       tex.colorSpace = THREE.SRGBColorSpace;
       tex.wrapS = THREE.ClampToEdgeWrapping;
       tex.wrapT = THREE.ClampToEdgeWrapping;
       mat.map = tex;
       mat.color.set(0xffffff);
       mat.needsUpdate = true;
-    });
+    };
+    img.src = item.img;
   });
 
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -98,11 +129,9 @@ function frontIndex(rot) {
   return best;
 }
 
-function updateLabel(rot) {
-  const idx = frontIndex(rot);
+function updateBar(idx) {
   state.activeIndex = idx;
   const item = ITEMS[idx];
-  labelEl.textContent = item.label;
   barLabelEl.textContent = item.label;
   thumbEl.style.backgroundImage = `url(${item.img})`;
 }
@@ -110,16 +139,51 @@ function updateLabel(rot) {
 function settleRotation() {
   const step = anglePerItem();
   state.rotY = Math.round(state.rotY / step) * step;
-  updateLabel(state.rotY);
+  updateBar(frontIndex(state.rotY));
 }
 
-function goTo(index) {
+function goToCircle(index) {
   const step = anglePerItem();
   const cur = ((state.rotY / step) % N + N) % N;
   const diff = ((index - cur + N / 2) % N + N) % N - N / 2;
   state.rotY += diff * step;
   settleRotation();
 }
+
+// ---------- line (flat cards) ----------
+
+function lineTransformFor(i, index, dragDelta) {
+  const spacing = state.cardW + 46;
+  const x = (i - index) * spacing + dragDelta;
+  const t = 1 - Math.min(Math.abs(x) / (spacing * 0.9), 1);
+  const scale = 0.82 + 0.18 * t;
+  const opacity = 0.35 + 0.65 * t;
+  return { transform: `translate(-50%, -50%) translateX(${x}px) scale(${scale})`, opacity, zIndex: Math.round(1000 + t * 100) };
+}
+
+function applyLineTransforms(withTransition) {
+  cardEls.forEach((el, i) => {
+    const t = lineTransformFor(i, state.activeIndex, state.dragDelta);
+    el.style.transition = withTransition ? 'transform 0.55s cubic-bezier(0.16,1,0.3,1), opacity 0.5s ease' : 'none';
+    el.style.transform = t.transform;
+    el.style.opacity = String(t.opacity);
+    el.style.zIndex = String(t.zIndex);
+  });
+}
+
+function nearestLineIndex() {
+  const spacing = state.cardW + 46;
+  const steps = Math.round(-state.dragDelta / spacing);
+  return Math.max(0, Math.min(N - 1, state.activeIndex + steps));
+}
+
+function goToLine(index) {
+  state.activeIndex = index;
+  applyLineTransforms(true);
+  updateBar(index);
+}
+
+// ---------- shared drag handling ----------
 
 function onPointerDown(e) {
   state.dragging = true;
@@ -136,6 +200,7 @@ function onPointerMove(e) {
   const dx = p.clientX - state.dragStartX;
   if (Math.abs(dx) > 5) state.moved = true;
   state.dragDelta = dx;
+  if (state.mode === 'line') applyLineTransforms(false);
 }
 
 function onPointerUp() {
@@ -144,11 +209,19 @@ function onPointerUp() {
   if (!state.moved) {
     navigateTo(ITEMS[state.activeIndex].id);
     state.dragDelta = 0;
+    if (state.mode === 'line') applyLineTransforms(true);
     return;
   }
-  state.rotY += state.dragDelta * 0.0044;
-  state.dragDelta = 0;
-  settleRotation();
+  if (state.mode === 'circle') {
+    state.rotY += state.dragDelta * 0.0044;
+    state.dragDelta = 0;
+    settleRotation();
+  } else {
+    state.activeIndex = nearestLineIndex();
+    state.dragDelta = 0;
+    applyLineTransforms(true);
+    updateBar(state.activeIndex);
+  }
 }
 
 function makeArrow(dir) {
@@ -157,12 +230,23 @@ function makeArrow(dir) {
   Object.assign(b.style, {
     width: '30px', height: '30px', borderRadius: '50%', border: 'none',
     background: 'rgba(255,255,255,0.18)', color: '#fff', cursor: 'pointer',
-    fontSize: '14px', lineHeight: '1',
+    fontSize: '14px', lineHeight: '1', flexShrink: '0',
   });
   b.addEventListener('click', () => {
-    goTo((state.activeIndex + (dir === 'prev' ? -1 : 1) + N) % N);
+    const next = (state.activeIndex + (dir === 'prev' ? -1 : 1) + N) % N;
+    if (state.mode === 'circle') goToCircle(next); else goToLine(next);
   });
   return b;
+}
+
+function setMode(mode) {
+  if (state.mode === mode) return;
+  state.mode = mode;
+  modeToggleEl.setAttribute('data-mode', mode);
+  canvasEl.style.display = mode === 'circle' ? 'block' : 'none';
+  lineWrapEl.style.display = mode === 'line' ? 'block' : 'none';
+  if (mode === 'line') { applyLineTransforms(false); updateBar(state.activeIndex); }
+  else { settleRotation(); }
 }
 
 function buildDom() {
@@ -180,21 +264,48 @@ function buildDom() {
   });
   root.appendChild(canvasEl);
 
-  canvasEl.addEventListener('mousedown', onPointerDown);
-  canvasEl.addEventListener('touchstart', onPointerDown, { passive: false });
+  lineWrapEl = document.createElement('div');
+  Object.assign(lineWrapEl.style, {
+    position: 'absolute', inset: '0', display: 'none',
+    touchAction: 'none', userSelect: 'none', cursor: 'grab',
+  });
+  root.appendChild(lineWrapEl);
+
+  cardEls = ITEMS.map((item) => {
+    const card = document.createElement('div');
+    Object.assign(card.style, {
+      position: 'absolute', left: '50%', top: '50%',
+      width: state.cardW + 'px', height: state.cardH + 'px',
+      borderRadius: '2px', overflow: 'hidden',
+      boxShadow: '0 20px 50px rgba(0,0,0,0.28)', cursor: 'pointer',
+    });
+    const img = document.createElement('img');
+    img.src = item.img;
+    img.alt = item.label;
+    Object.assign(img.style, { width: '100%', height: '100%', objectFit: 'cover', display: 'block' });
+    card.appendChild(img);
+    const overlay = document.createElement('div');
+    Object.assign(overlay.style, {
+      position: 'absolute', left: '0', right: '0', bottom: '0', padding: '14px 16px 12px',
+      background: 'linear-gradient(to top, rgba(0,0,0,0.55), rgba(0,0,0,0))',
+    });
+    const label = document.createElement('span');
+    label.textContent = item.label;
+    Object.assign(label.style, { fontFamily: SANS, fontSize: '12px', letterSpacing: '0.18em', color: '#fff', fontWeight: '700' });
+    overlay.appendChild(label);
+    card.appendChild(overlay);
+    lineWrapEl.appendChild(card);
+    return card;
+  });
+
+  [canvasEl, lineWrapEl].forEach((el) => {
+    el.addEventListener('mousedown', onPointerDown);
+    el.addEventListener('touchstart', onPointerDown, { passive: false });
+  });
   window.addEventListener('mousemove', onPointerMove);
   window.addEventListener('touchmove', onPointerMove, { passive: false });
   window.addEventListener('mouseup', onPointerUp);
   window.addEventListener('touchend', onPointerUp);
-
-  labelEl = document.createElement('div');
-  Object.assign(labelEl.style, {
-    position: 'absolute', left: '50%', top: '46%', transform: 'translate(-50%, -50%)',
-    fontFamily: SERIF, fontStyle: 'italic', fontSize: 'clamp(32px, 5vw, 64px)',
-    color: 'rgba(255,255,255,0.94)', textShadow: '0 2px 18px rgba(0,0,0,0.35)',
-    pointerEvents: 'none', letterSpacing: '0.01em',
-  });
-  root.appendChild(labelEl);
 
   barEl = document.createElement('div');
   Object.assign(barEl.style, {
@@ -207,20 +318,31 @@ function buildDom() {
   root.appendChild(barEl);
 
   thumbEl = document.createElement('div');
-  Object.assign(thumbEl.style, {
-    width: '38px', height: '38px', borderRadius: '50%', backgroundSize: 'cover',
-    backgroundPosition: 'center', flexShrink: '0',
-  });
+  Object.assign(thumbEl.style, { width: '38px', height: '38px', borderRadius: '50%', backgroundSize: 'cover', backgroundPosition: 'center', flexShrink: '0' });
   barEl.appendChild(thumbEl);
 
   barLabelEl = document.createElement('div');
-  Object.assign(barLabelEl.style, { fontSize: '12px', letterSpacing: '0.16em', fontWeight: '700' });
+  Object.assign(barLabelEl.style, { fontSize: '12px', letterSpacing: '0.16em', fontWeight: '700', minWidth: '64px' });
   barEl.appendChild(barLabelEl);
 
   barEl.appendChild(makeArrow('prev'));
   barEl.appendChild(makeArrow('next'));
 
-  updateLabel(state.rotY);
+  modeToggleEl = document.createElement('div');
+  modeToggleEl.setAttribute('data-mode', state.mode);
+  Object.assign(modeToggleEl.style, {
+    display: 'flex', gap: '6px', alignItems: 'center', marginLeft: '6px',
+    fontSize: '11px', letterSpacing: '0.14em', cursor: 'pointer',
+    borderLeft: '1px solid rgba(255,255,255,0.3)', paddingLeft: '14px',
+  });
+  const cLabel = document.createElement('span'); cLabel.textContent = 'CIRCLE';
+  const sep = document.createElement('span'); sep.textContent = '/';
+  const lLabel = document.createElement('span'); lLabel.textContent = 'LINE';
+  [cLabel, sep, lLabel].forEach((el) => modeToggleEl.appendChild(el));
+  modeToggleEl.addEventListener('click', () => setMode(state.mode === 'circle' ? 'line' : 'circle'));
+  barEl.appendChild(modeToggleEl);
+
+  updateBar(0);
 }
 
 function syncFrame() {
@@ -235,6 +357,7 @@ function syncFrame() {
   if (!state.visible) {
     state.visible = true;
     root.style.display = 'block';
+    if (state.mode === 'line') applyLineTransforms(false);
   }
   root.style.left = rect.left + 'px';
   root.style.top = rect.top + 'px';
@@ -248,16 +371,25 @@ function syncFrame() {
     camera.updateProjectionMatrix();
     renderer.setSize(w, h, false);
   }
+
+  const available = Math.min(rect.width * 0.7, rect.height * 0.85);
+  const targetCardW = Math.round(Math.min(available, 420));
+  if (Math.abs(targetCardW - state.cardW) > 4) {
+    state.cardW = targetCardW;
+    state.cardH = Math.round(targetCardW * (2 / 3));
+    cardEls.forEach((card) => { card.style.width = state.cardW + 'px'; card.style.height = state.cardH + 'px'; });
+    if (state.mode === 'line') applyLineTransforms(false);
+  }
 }
 
 function tick() {
   raf = requestAnimationFrame(tick);
   syncFrame();
-  if (!state.visible) return;
+  if (!state.visible || state.mode !== 'circle') return;
 
   const liveRot = state.dragging ? state.rotY + state.dragDelta * 0.0044 : state.rotY;
   group.rotation.y = liveRot;
-  if (state.dragging) updateLabel(liveRot);
+  if (state.dragging) updateBar(frontIndex(liveRot));
   renderer.render(scene, camera);
 }
 
