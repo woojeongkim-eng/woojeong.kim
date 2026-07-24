@@ -364,22 +364,34 @@ function syncFrame() {
     root.style.display = 'block';
     if (state.mode === 'line') applyLineTransforms(false);
   }
-  root.style.left = rect.left + 'px';
-  root.style.top = rect.top + 'px';
-  root.style.width = rect.width + 'px';
-  root.style.height = rect.height + 'px';
 
-  const w = rect.width, h = rect.height;
+  // Clear whatever space the "Kim Woojeong / Portfolio" title actually
+  // takes up (its font scales with viewport width, so a fixed offset would
+  // either overlap on wide desktop screens or leave a huge gap on tall
+  // mobile ones) — measure it fresh every frame instead.
+  const titleEl = document.getElementById('pf-home-title');
+  let topPad = 0;
+  if (titleEl) {
+    const tRect = titleEl.getBoundingClientRect();
+    topPad = Math.max(0, Math.min(tRect.bottom - rect.top + 28, rect.height * 0.6));
+  }
+
+  root.style.left = rect.left + 'px';
+  root.style.top = (rect.top + topPad) + 'px';
+  root.style.width = rect.width + 'px';
+  root.style.height = (rect.height - topPad) + 'px';
+
+  const w = rect.width, h = rect.height - topPad;
   if (canvasEl.__w !== w || canvasEl.__h !== h) {
     canvasEl.__w = w; canvasEl.__h = h;
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
     renderer.setSize(w, h, false);
-    const scale = Math.max(0.95, Math.min(w / 900, 1.55));
+    const scale = Math.max(0.6, Math.min(w / 900, 1.55));
     group.scale.setScalar(scale);
   }
 
-  const available = Math.min(rect.width * 0.82, rect.height * 0.92);
+  const available = Math.min(rect.width * 0.82, h * 0.92);
   const targetCardW = Math.round(Math.min(available, 560));
   if (Math.abs(targetCardW - state.cardW) > 4) {
     state.cardW = targetCardW;

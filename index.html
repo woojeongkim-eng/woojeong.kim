@@ -122,7 +122,7 @@
     <main key="home" style="{{ homePageStyle }}">
       <div class="pf-float-wrap"></div>
 
-      <div style="{{ homeCenterStyle }}">
+      <div id="pf-home-title" style="{{ homeCenterStyle }}">
         <span style="{{ homeCenterCaptionStyle }}">Kim Woojeong</span>
         <span style="{{ homeBrandStyle }}">Portfolio</span>
       </div>
@@ -1803,16 +1803,16 @@ class Component extends DCLogic {
         overflow: 'hidden',
         animation: 'pf-fade-up 0.6s ease both',
       },
-      homeCenterStyle: { position: 'absolute', top: '9%', left: '50%', transform: 'translateX(-50%)', zIndex: 5, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', textAlign: 'center' },
+      homeCenterStyle: { position: 'absolute', top: '4%', left: '50%', transform: 'translateX(-50%)', zIndex: 5, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', textAlign: 'center' },
       homeBrandStyle: {
         fontFamily: serif,
         fontStyle: 'italic',
         fontWeight: 500,
-        fontSize: 'clamp(30px, 4.6vw, 60px)',
+        fontSize: 'clamp(46px, 8vw, 104px)',
         color: ink,
         letterSpacing: '0.01em',
       },
-      homeCenterCaptionStyle: { fontFamily: sans, fontSize: '12px', letterSpacing: '0.24em', color: mutedInk },
+      homeCenterCaptionStyle: { fontFamily: serif, fontStyle: 'italic', fontSize: 'clamp(14px, 1.6vw, 20px)', letterSpacing: '0.1em', color: mutedInk },
       homeBottomNavStyle: {
         marginTop: '18px',
         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', flexWrap: 'wrap',
