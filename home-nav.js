@@ -56,18 +56,20 @@ function circleBaseAngle(i) {
 function cssTransformFor(i, index, mode, dragDelta) {
   const n = ITEMS.length;
   if (mode === 'circle') {
-    const radius = Math.round(state.cardW * 0.95);
+    const radius = Math.round(state.cardW * 1.15);
     const dragAngle = dragDelta * 0.32;
     const baseOffset = -circleBaseAngle(index); // rotate so `index` sits at the top
     const angle = circleBaseAngle(i) + baseOffset + dragAngle;
     const rad = (angle * Math.PI) / 180;
     const x = radius * Math.cos(rad);
-    const y = radius * Math.sin(rad);
+    const verticalOffset = state.cardH * 0.4; // push the whole circle down, clear of the name label above it
+    const y = radius * Math.sin(rad) * 0.5 + verticalOffset; // flatten vertically: looking at a big tilted wheel, not a flat clock face
+    const tilt = Math.max(-28, Math.min(28, -angle * 0.22)); // subtle rotateY per card for the 3D-wheel look
     const norm = ((angle - circleBaseAngle(0) + 180) % 360 + 360) % 360 - 180;
     const t = 1 - Math.min(Math.abs(norm) / 180, 1);
-    const scale = 0.86 + 0.14 * t;
+    const scale = 0.9 + 0.1 * t;
     return {
-      transform: `translate(-50%, -50%) translate(${x}px, ${y}px) scale(${scale})`,
+      transform: `translate(-50%, -50%) translate(${x}px, ${y}px) rotateY(${tilt}deg) scale(${scale})`,
       opacity: 1,
       zIndex: Math.round(1000 + t * 100),
     };
@@ -273,8 +275,8 @@ function syncFrame() {
   // Circle mode needs room for the full circle (~2.9x card width across);
   // line mode just needs 3 cards in a row. Size for the circle case since
   // it's the default and the tighter constraint.
-  const available = Math.min(rect.width * 0.92, rect.height * 0.8);
-  const targetCardW = Math.round(Math.min(available / 2.7, 460));
+  const available = Math.min(rect.width * 0.96, rect.height * 1.0);
+  const targetCardW = Math.round(Math.min(available / 2.0, 560));
   if (Math.abs(targetCardW - state.cardW) > 4) {
     state.cardW = targetCardW;
     state.cardH = Math.round(targetCardW * (2 / 3));
