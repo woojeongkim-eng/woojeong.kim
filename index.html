@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="./support.js"></script>
 <script defer src="/_vercel/insights/script.js"></script>
+<script type="module" src="./home-nav.js"></script>
 </head>
 <body>
 <x-dc>
@@ -110,21 +111,17 @@
 
   <!-- HOME PAGE -->
   <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
-    <main key="home" style="{{ homePageStyle }}" onMouseMove="{{ onHomeMouseMove }}" onTouchMove="{{ onHomeTouchMove }}">
-      <div class="pf-float-wrap">
-        <sc-for list="{{ floatThumbs }}" as="th" hint-placeholder-count="35">
-          <div class="pf-float-tile" style="{{ th.wrapStyle }}">{{ th.el }}</div>
-        </sc-for>
-      </div>
+    <main key="home" style="{{ homePageStyle }}">
+      <div class="pf-float-wrap"></div>
 
       <div style="{{ homeCenterStyle }}">
         <span style="{{ homeBrandStyle }}">{{ myName }}</span>
-        <div style="{{ homeBottomNavStyle }}">
-          <span>THE</span>
-          <a href="#" class="pf-social" style="{{ homeBottomLinkStyle }}" onClick="{{ enterArchive }}">ARCHIVE</a>
-          <span>AND</span>
-          <a href="#" class="pf-social" style="{{ homeBottomLinkStyle }}" onClick="{{ enterAbout }}">ABOUT ME</a>
-        </div>
+      </div>
+
+      <div style="{{ hiddenNavProxyStyle }}">
+        <a href="#" data-nav-id="archive" onClick="{{ enterArchive }}">ARCHIVE</a>
+        <a href="#" data-nav-id="profile" onClick="{{ enterAbout }}">ABOUT ME</a>
+        <a href="#" data-nav-id="project" onClick="{{ enterProjectFromHome }}">PROJECT</a>
       </div>
     </main>
   </sc-if>
@@ -1813,8 +1810,17 @@ class Component extends DCLogic {
         fontFamily: sans, fontSize: '12px', letterSpacing: '0.14em', color: faintInk,
       },
       homeBottomLinkStyle: { fontFamily: sans, fontSize: '12px', letterSpacing: '0.14em', color: ink, textDecoration: 'none', fontWeight: 700 },
+      hiddenNavProxyStyle: { position: 'absolute', width: '1px', height: '1px', overflow: 'hidden', opacity: 0, pointerEvents: 'none' },
       enterArchive: () => this.setPage('archive'),
       enterAbout: () => this.setPage('profile'),
+      enterProjectFromHome: (e) => {
+        e.preventDefault();
+        if (!this.state.projectUnlocked) {
+          this.setState({ showProjectLock: true, passcodeInput: '', passcodeError: false });
+        } else {
+          this.setPage('project');
+        }
+      },
       onHomeMouseMove: (e) => {
         if (this._mouseRaf) return;
         const clientX = e.clientX, clientY = e.clientY, target = e.currentTarget;
