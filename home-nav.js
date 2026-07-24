@@ -39,7 +39,7 @@ const state = {
   dragDelta: 0,
   moved: false,
   visible: false,
-  rotY: 0, // circle mode: settled rotation (radians)
+  rotY: -Math.PI / N, // circle mode: settled rotation (radians) — offset so panel 0's own center (at +step/2) faces the camera
   cardW: 260,
   cardH: 173,
 };
@@ -70,7 +70,7 @@ function buildScene() {
   scene.add(group);
 
   const radius = 190;
-  const height = radius * 1.55;
+  const height = radius * 0.92;
   const gap = 0.02;
 
   ITEMS.forEach((item, i) => {
@@ -92,15 +92,20 @@ function buildScene() {
       c.width = cw; c.height = ch;
       const ctx = c.getContext('2d');
       ctx.drawImage(img, 0, 0, cw, ch);
-      const grad = ctx.createLinearGradient(0, ch * 0.55, 0, ch);
-      grad.addColorStop(0, 'rgba(0,0,0,0)');
-      grad.addColorStop(1, 'rgba(0,0,0,0.45)');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, ch * 0.55, cw, ch * 0.45);
+      ctx.fillStyle = 'rgba(0,0,0,0.18)';
+      ctx.fillRect(0, 0, cw, ch);
       ctx.fillStyle = 'rgba(255,255,255,0.96)';
-      ctx.font = `italic ${Math.round(ch * 0.13)}px Georgia, serif`;
-      ctx.textBaseline = 'alphabetic';
-      ctx.fillText(item.label.charAt(0) + item.label.slice(1).toLowerCase(), cw * 0.06, ch * 0.9);
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const text = item.label.charAt(0) + item.label.slice(1).toLowerCase();
+      let fontSize = Math.round(ch * 0.16);
+      const maxWidth = cw * 0.78;
+      ctx.font = `italic ${fontSize}px ${SERIF}`;
+      while (ctx.measureText(text).width > maxWidth && fontSize > 10) {
+        fontSize -= 2;
+        ctx.font = `italic ${fontSize}px ${SERIF}`;
+      }
+      ctx.fillText(text, cw / 2, ch / 2);
       const tex = new THREE.CanvasTexture(c);
       tex.colorSpace = THREE.SRGBColorSpace;
       tex.wrapS = THREE.ClampToEdgeWrapping;
@@ -121,7 +126,7 @@ function frontIndex(rot) {
   const step = anglePerItem();
   let best = 0, bestDiff = Infinity;
   for (let i = 0; i < N; i++) {
-    const world = i * step + rot;
+    const world = i * step + step / 2 + rot;
     const norm = Math.atan2(Math.sin(world), Math.cos(world));
     const diff = Math.abs(norm);
     if (diff < bestDiff) { bestDiff = diff; best = i; }
@@ -138,13 +143,13 @@ function updateBar(idx) {
 
 function settleRotation() {
   const step = anglePerItem();
-  state.rotY = Math.round(state.rotY / step) * step;
+  state.rotY = Math.round((state.rotY + step / 2) / step) * step - step / 2;
   updateBar(frontIndex(state.rotY));
 }
 
 function goToCircle(index) {
   const step = anglePerItem();
-  const cur = ((state.rotY / step) % N + N) % N;
+  const cur = (((state.rotY + step / 2) / step) % N + N) % N;
   const diff = ((index - cur + N / 2) % N + N) % N - N / 2;
   state.rotY += diff * step;
   settleRotation();
@@ -286,12 +291,12 @@ function buildDom() {
     card.appendChild(img);
     const overlay = document.createElement('div');
     Object.assign(overlay.style, {
-      position: 'absolute', left: '0', right: '0', bottom: '0', padding: '14px 16px 12px',
-      background: 'linear-gradient(to top, rgba(0,0,0,0.55), rgba(0,0,0,0))',
+      position: 'absolute', inset: '0', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: 'rgba(0,0,0,0.18)',
     });
     const label = document.createElement('span');
-    label.textContent = item.label;
-    Object.assign(label.style, { fontFamily: SANS, fontSize: '12px', letterSpacing: '0.18em', color: '#fff', fontWeight: '700' });
+    label.textContent = item.label.charAt(0) + item.label.slice(1).toLowerCase();
+    Object.assign(label.style, { fontFamily: SERIF, fontStyle: 'italic', fontSize: 'clamp(20px, 3vw, 34px)', color: 'rgba(255,255,255,0.96)' });
     overlay.appendChild(label);
     card.appendChild(overlay);
     lineWrapEl.appendChild(card);
@@ -370,13 +375,15 @@ function syncFrame() {
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
     renderer.setSize(w, h, false);
+    const scale = Math.max(0.95, Math.min(w / 900, 1.55));
+    group.scale.setScalar(scale);
   }
 
-  const available = Math.min(rect.width * 0.7, rect.height * 0.85);
-  const targetCardW = Math.round(Math.min(available, 420));
+  const available = Math.min(rect.width * 0.82, rect.height * 0.92);
+  const targetCardW = Math.round(Math.min(available, 560));
   if (Math.abs(targetCardW - state.cardW) > 4) {
     state.cardW = targetCardW;
-    state.cardH = Math.round(targetCardW * (2 / 3));
+    state.cardH = Math.round(targetCardW * 0.56);
     cardEls.forEach((card) => { card.style.width = state.cardW + 'px'; card.style.height = state.cardH + 'px'; });
     if (state.mode === 'line') applyLineTransforms(false);
   }
