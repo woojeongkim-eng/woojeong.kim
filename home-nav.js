@@ -14,9 +14,9 @@
 // routing here.
 
 const ITEMS = [
-  { id: 'archive', label: 'ARCHIVE', img: 'uploads/home/archive-lily.jpg' },
-  { id: 'project', label: 'PROJECT', img: 'uploads/home/project-hands-rings.jpg' },
   { id: 'profile', label: 'PROFILE', img: 'uploads/home/profile-croissant-tea.jpg' },
+  { id: 'project', label: 'PROJECT', img: 'uploads/home/project-hands-rings.jpg' },
+  { id: 'archive', label: 'ARCHIVE', img: 'uploads/home/archive-lily.jpg' },
 ];
 
 const SERIF = "'Cormorant Garamond', Georgia, serif";
@@ -44,20 +44,31 @@ const state = {
   cardH: 173,
 };
 
+// Circle mode is a flat 2D arrangement (not a 3D ring you rotate edge-on) —
+// all 3 cards sit on the circumference of an actual circle and stay fully
+// visible at all times; dragging spins the whole circle. This reads
+// immediately as "a circle" rather than a carousel where only one card is
+// legible at a time.
+function circleBaseAngle(i) {
+  return -90 + i * (360 / ITEMS.length); // item 0 starts at the top
+}
+
 function cssTransformFor(i, index, mode, dragDelta) {
   const n = ITEMS.length;
   if (mode === 'circle') {
-    const radius = Math.round(state.cardW * 1.05);
-    const anglePerItem = 360 / n;
-    const dragAngle = dragDelta * 0.28;
-    const angle = (i - index) * anglePerItem + dragAngle;
-    const norm = ((angle + 180) % 360 + 360) % 360 - 180;
-    const t = 1 - Math.min(Math.abs(norm) / 130, 1);
-    const scale = 0.72 + 0.28 * t;
-    const opacity = 0.28 + 0.72 * t;
+    const radius = Math.round(state.cardW * 0.95);
+    const dragAngle = dragDelta * 0.32;
+    const baseOffset = -circleBaseAngle(index); // rotate so `index` sits at the top
+    const angle = circleBaseAngle(i) + baseOffset + dragAngle;
+    const rad = (angle * Math.PI) / 180;
+    const x = radius * Math.cos(rad);
+    const y = radius * Math.sin(rad);
+    const norm = ((angle - circleBaseAngle(0) + 180) % 360 + 360) % 360 - 180;
+    const t = 1 - Math.min(Math.abs(norm) / 180, 1);
+    const scale = 0.86 + 0.14 * t;
     return {
-      transform: `translate(-50%, -50%) rotateY(${angle}deg) translateZ(${radius}px) scale(${scale})`,
-      opacity,
+      transform: `translate(-50%, -50%) translate(${x}px, ${y}px) scale(${scale})`,
+      opacity: 1,
       zIndex: Math.round(1000 + t * 100),
     };
   }
@@ -89,7 +100,7 @@ function nearestIndexFromDrag() {
   const n = ITEMS.length;
   if (state.mode === 'circle') {
     const anglePerItem = 360 / n;
-    const dragAngle = state.dragDelta * 0.28;
+    const dragAngle = state.dragDelta * 0.32;
     const steps = Math.round(-dragAngle / anglePerItem);
     let idx = (state.activeIndex + steps) % n;
     if (idx < 0) idx += n;
@@ -259,7 +270,11 @@ function syncFrame() {
   root.style.width = rect.width + 'px';
   root.style.height = rect.height + 'px';
 
-  const targetCardW = Math.round(Math.min(rect.width * 0.34, rect.height * 0.62, 300));
+  // Circle mode needs room for the full circle (~2.9x card width across);
+  // line mode just needs 3 cards in a row. Size for the circle case since
+  // it's the default and the tighter constraint.
+  const available = Math.min(rect.width * 0.92, rect.height * 0.8);
+  const targetCardW = Math.round(Math.min(available / 2.7, 460));
   if (Math.abs(targetCardW - state.cardW) > 4) {
     state.cardW = targetCardW;
     state.cardH = Math.round(targetCardW * (2 / 3));
