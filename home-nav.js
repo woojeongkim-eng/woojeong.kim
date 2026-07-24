@@ -1,116 +1,42 @@
-// Home page main element: 3 categories (Archive / Project / Profile) that
-// can be browsed either as a draggable 3D ring (circle mode) or a
-// draggable horizontal row (line mode), with a toggle to switch between
-// the two. Built once and appended to document.body — NOT inside the
-// framework's re-rendered component tree — because this site re-renders
-// its whole home page on a timer (see webgl-home history for why that
-// matters: anything mounted inside gets torn down repeatedly). Position
-// is synced every frame to the `.pf-float-wrap` placeholder div,
-// which lives inside the component and is cheap to recreate.
+import * as THREE from 'three';
+
+// Home page main element: a big rotating 3D cylinder, its curved surface
+// wrapped with the Profile / Project / Archive photos (120° of the drum
+// each), with a bottom control bar (thumbnail + label + prev/next) and
+// drag-to-spin. Built once and appended to document.body — outside the
+// framework's re-rendered component tree (the home page re-renders on a
+// timer and tears down anything mounted inside it; see prior history).
+// Position is synced every frame to the `.pf-float-wrap` placeholder div.
 //
 // Navigation reuses the site's own page-routing logic (including the
-// Project passcode gate) by clicking hidden proxy links rendered in the
-// home page's own template (`[data-nav-id]`), rather than reimplementing
-// routing here.
+// Project passcode gate) via the hidden `[data-nav-id]` proxy links
+// rendered in the home page's own template.
 
 const ITEMS = [
   { id: 'profile', label: 'PROFILE', img: 'uploads/home/profile-croissant-tea.jpg' },
   { id: 'project', label: 'PROJECT', img: 'uploads/home/project-hands-rings.jpg' },
   { id: 'archive', label: 'ARCHIVE', img: 'uploads/home/archive-lily.jpg' },
 ];
-
-const SERIF = "'Cormorant Garamond', Georgia, serif";
+const N = ITEMS.length;
 const SANS = "'Archivo', Helvetica, Arial, sans-serif";
+const SERIF = "'Cormorant Garamond', Georgia, serif";
 
-let root = null;
-let anchorEl = null;
-let stageEl = null;
-let ringEl = null;
-let toggleEl = null;
-let cardEls = [];
-let built = false;
+let renderer = null, scene = null, camera = null, group = null;
+let canvasEl = null, root = null, labelEl = null, barEl = null, thumbEl = null, barLabelEl = null;
+let raf = null, built = false;
 
 const state = {
-  mode: 'circle', // 'circle' | 'line'
   activeIndex: 0,
   dragging: false,
   dragStartX: 0,
-  dragStartY: 0,
   dragDelta: 0,
   moved: false,
-  dragTargetIndex: null,
   visible: false,
-  cardW: 260,
-  cardH: 173,
+  rotY: 0, // settled rotation (radians)
 };
 
-// Circle mode is a flat 2D arrangement (not a 3D ring you rotate edge-on) —
-// all 3 cards sit on the circumference of an actual circle and stay fully
-// visible at all times; dragging spins the whole circle. This reads
-// immediately as "a circle" rather than a carousel where only one card is
-// legible at a time.
-function circleBaseAngle(i) {
-  return -90 + i * (360 / ITEMS.length); // item 0 starts at the top
-}
-
-function cssTransformFor(i, index, mode, dragDelta) {
-  const n = ITEMS.length;
-  if (mode === 'circle') {
-    const radius = Math.round(state.cardW * 1.15);
-    const dragAngle = dragDelta * 0.32;
-    const baseOffset = -circleBaseAngle(index); // rotate so `index` sits at the top
-    const angle = circleBaseAngle(i) + baseOffset + dragAngle;
-    const rad = (angle * Math.PI) / 180;
-    const x = radius * Math.cos(rad);
-    const verticalOffset = state.cardH * 0.4; // push the whole circle down, clear of the name label above it
-    const y = radius * Math.sin(rad) * 0.5 + verticalOffset; // flatten vertically: looking at a big tilted wheel, not a flat clock face
-    const tilt = Math.max(-28, Math.min(28, -angle * 0.22)); // subtle rotateY per card for the 3D-wheel look
-    const norm = ((angle - circleBaseAngle(0) + 180) % 360 + 360) % 360 - 180;
-    const t = 1 - Math.min(Math.abs(norm) / 180, 1);
-    const scale = 0.9 + 0.1 * t;
-    return {
-      transform: `translate(-50%, -50%) translate(${x}px, ${y}px) rotateY(${tilt}deg) scale(${scale})`,
-      opacity: 1,
-      zIndex: Math.round(1000 + t * 100),
-    };
-  }
-  const spacing = state.cardW + 46;
-  const x = (i - index) * spacing + dragDelta;
-  const t = 1 - Math.min(Math.abs(x) / (spacing * 0.9), 1);
-  const scale = 0.82 + 0.18 * t;
-  const opacity = 0.35 + 0.65 * t;
-  return {
-    transform: `translate(-50%, -50%) translateX(${x}px) scale(${scale})`,
-    opacity,
-    zIndex: Math.round(1000 + t * 100),
-  };
-}
-
-function applyTransforms(withTransition) {
-  cardEls.forEach((el, i) => {
-    const t = cssTransformFor(i, state.activeIndex, state.mode, state.dragDelta);
-    el.style.transition = withTransition
-      ? 'transform 0.62s cubic-bezier(0.16,1,0.3,1), opacity 0.5s ease'
-      : 'none';
-    el.style.transform = t.transform;
-    el.style.opacity = String(t.opacity);
-    el.style.zIndex = String(t.zIndex);
-  });
-}
-
-function nearestIndexFromDrag() {
-  const n = ITEMS.length;
-  if (state.mode === 'circle') {
-    const anglePerItem = 360 / n;
-    const dragAngle = state.dragDelta * 0.32;
-    const steps = Math.round(-dragAngle / anglePerItem);
-    let idx = (state.activeIndex + steps) % n;
-    if (idx < 0) idx += n;
-    return idx;
-  }
-  const spacing = state.cardW + 46;
-  const steps = Math.round(-state.dragDelta / spacing);
-  return Math.max(0, Math.min(n - 1, state.activeIndex + steps));
+function anglePerItem() {
+  return (Math.PI * 2) / N;
 }
 
 function navigateTo(id) {
@@ -118,15 +44,89 @@ function navigateTo(id) {
   if (link) link.click();
 }
 
-function onPointerDown(e, itemIndex) {
+function buildScene() {
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(35, 16 / 9, 1, 5000);
+  camera.position.set(0, 0, 1000);
+  camera.lookAt(0, 0, 0);
+
+  scene.add(new THREE.AmbientLight(0xffffff, 1.1));
+  const dir = new THREE.DirectionalLight(0xffffff, 0.35);
+  dir.position.set(200, 300, 400);
+  scene.add(dir);
+
+  group = new THREE.Group();
+  scene.add(group);
+
+  const radius = 460;
+  const height = radius * 1.6;
+  const loader = new THREE.TextureLoader();
+  const gap = 0.018; // small radian gap between panels
+
+  ITEMS.forEach((item, i) => {
+    const thetaStart = i * anglePerItem() + gap / 2;
+    const thetaLength = anglePerItem() - gap;
+    const geo = new THREE.CylinderGeometry(radius, radius, height, 48, 1, true, thetaStart, thetaLength);
+    const mat = new THREE.MeshStandardMaterial({ color: 0xdedad2, side: THREE.DoubleSide, roughness: 0.85 });
+    const mesh = new THREE.Mesh(geo, mat);
+    group.add(mesh);
+
+    loader.load(item.img, (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.wrapS = THREE.ClampToEdgeWrapping;
+      tex.wrapT = THREE.ClampToEdgeWrapping;
+      mat.map = tex;
+      mat.color.set(0xffffff);
+      mat.needsUpdate = true;
+    });
+  });
+
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  canvasEl = renderer.domElement;
+}
+
+function frontIndex(rot) {
+  const step = anglePerItem();
+  let best = 0, bestDiff = Infinity;
+  for (let i = 0; i < N; i++) {
+    const world = i * step + rot;
+    const norm = Math.atan2(Math.sin(world), Math.cos(world));
+    const diff = Math.abs(norm);
+    if (diff < bestDiff) { bestDiff = diff; best = i; }
+  }
+  return best;
+}
+
+function updateLabel(rot) {
+  const idx = frontIndex(rot);
+  state.activeIndex = idx;
+  const item = ITEMS[idx];
+  labelEl.textContent = item.label;
+  barLabelEl.textContent = item.label;
+  thumbEl.style.backgroundImage = `url(${item.img})`;
+}
+
+function settleRotation() {
+  const step = anglePerItem();
+  state.rotY = Math.round(state.rotY / step) * step;
+  updateLabel(state.rotY);
+}
+
+function goTo(index) {
+  const step = anglePerItem();
+  const cur = ((state.rotY / step) % N + N) % N;
+  const diff = ((index - cur + N / 2) % N + N) % N - N / 2;
+  state.rotY += diff * step;
+  settleRotation();
+}
+
+function onPointerDown(e) {
   state.dragging = true;
   state.moved = false;
   state.dragDelta = 0;
-  state.dragTargetIndex = itemIndex;
   const p = e.touches ? e.touches[0] : e;
   state.dragStartX = p.clientX;
-  state.dragStartY = p.clientY;
-  applyTransforms(false);
   e.preventDefault && e.preventDefault();
 }
 
@@ -134,33 +134,35 @@ function onPointerMove(e) {
   if (!state.dragging) return;
   const p = e.touches ? e.touches[0] : e;
   const dx = p.clientX - state.dragStartX;
-  const dy = p.clientY - state.dragStartY;
-  if (Math.abs(dx) > 5 || Math.abs(dy) > 5) state.moved = true;
+  if (Math.abs(dx) > 5) state.moved = true;
   state.dragDelta = dx;
-  applyTransforms(false);
 }
 
 function onPointerUp() {
   if (!state.dragging) return;
   state.dragging = false;
-
-  if (!state.moved && state.dragTargetIndex != null) {
-    navigateTo(ITEMS[state.dragTargetIndex].id);
+  if (!state.moved) {
+    navigateTo(ITEMS[state.activeIndex].id);
     state.dragDelta = 0;
-    applyTransforms(true);
     return;
   }
-
-  state.activeIndex = nearestIndexFromDrag();
+  state.rotY += state.dragDelta * 0.0044;
   state.dragDelta = 0;
-  applyTransforms(true);
+  settleRotation();
 }
 
-function setMode(mode) {
-  if (state.mode === mode) return;
-  state.mode = mode;
-  toggleEl.setAttribute('data-mode', mode);
-  applyTransforms(true);
+function makeArrow(dir) {
+  const b = document.createElement('button');
+  b.textContent = dir === 'prev' ? '←' : '→';
+  Object.assign(b.style, {
+    width: '30px', height: '30px', borderRadius: '50%', border: 'none',
+    background: 'rgba(255,255,255,0.18)', color: '#fff', cursor: 'pointer',
+    fontSize: '14px', lineHeight: '1',
+  });
+  b.addEventListener('click', () => {
+    goTo((state.activeIndex + (dir === 'prev' ? -1 : 1) + N) % N);
+  });
+  return b;
 }
 
 function buildDom() {
@@ -169,94 +171,62 @@ function buildDom() {
     position: 'fixed', left: '0px', top: '0px', width: '1px', height: '1px',
     display: 'none', zIndex: '2',
   });
+  document.body.appendChild(root);
 
-  stageEl = document.createElement('div');
-  Object.assign(stageEl.style, {
-    position: 'absolute', inset: '0', perspective: '1600px',
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    touchAction: 'none', userSelect: 'none', cursor: 'grab',
+  buildScene();
+  Object.assign(canvasEl.style, {
+    position: 'absolute', inset: '0', width: '100%', height: '100%',
+    display: 'block', cursor: 'grab', touchAction: 'none',
   });
-  root.appendChild(stageEl);
+  root.appendChild(canvasEl);
 
-  ringEl = document.createElement('div');
-  Object.assign(ringEl.style, {
-    position: 'relative', width: '1px', height: '1px', transformStyle: 'preserve-3d',
-  });
-  stageEl.appendChild(ringEl);
-
-  cardEls = ITEMS.map((item) => {
-    const card = document.createElement('div');
-    Object.assign(card.style, {
-      position: 'absolute', left: '50%', top: '50%',
-      width: state.cardW + 'px', height: state.cardH + 'px',
-      borderRadius: '2px', overflow: 'hidden',
-      boxShadow: '0 20px 50px rgba(0,0,0,0.28)',
-      backfaceVisibility: 'hidden',
-      cursor: 'pointer',
-    });
-
-    const img = document.createElement('img');
-    img.src = item.img;
-    img.alt = item.label;
-    Object.assign(img.style, { width: '100%', height: '100%', objectFit: 'cover', display: 'block' });
-    card.appendChild(img);
-
-    const overlay = document.createElement('div');
-    Object.assign(overlay.style, {
-      position: 'absolute', left: '0', right: '0', bottom: '0',
-      padding: '14px 16px 12px',
-      background: 'linear-gradient(to top, rgba(0,0,0,0.55), rgba(0,0,0,0))',
-    });
-    const label = document.createElement('span');
-    label.textContent = item.label;
-    Object.assign(label.style, {
-      fontFamily: SANS, fontSize: '12px', letterSpacing: '0.18em',
-      color: '#fff', fontWeight: '700',
-    });
-    overlay.appendChild(label);
-    card.appendChild(overlay);
-
-    ringEl.appendChild(card);
-    return card;
-  });
-
-  cardEls.forEach((card, i) => {
-    card.addEventListener('mousedown', (e) => onPointerDown(e, i));
-    card.addEventListener('touchstart', (e) => onPointerDown(e, i), { passive: false });
-  });
+  canvasEl.addEventListener('mousedown', onPointerDown);
+  canvasEl.addEventListener('touchstart', onPointerDown, { passive: false });
   window.addEventListener('mousemove', onPointerMove);
   window.addEventListener('touchmove', onPointerMove, { passive: false });
   window.addEventListener('mouseup', onPointerUp);
   window.addEventListener('touchend', onPointerUp);
 
-  toggleEl = document.createElement('div');
-  toggleEl.setAttribute('data-mode', state.mode);
-  Object.assign(toggleEl.style, {
-    position: 'absolute', left: '50%', bottom: '9%', transform: 'translateX(-50%)',
-    display: 'flex', gap: '8px', alignItems: 'center',
-    fontFamily: SANS, fontSize: '11px', letterSpacing: '0.16em', color: 'rgba(58,54,48,0.55)',
-    pointerEvents: 'auto', cursor: 'pointer', userSelect: 'none',
+  labelEl = document.createElement('div');
+  Object.assign(labelEl.style, {
+    position: 'absolute', left: '50%', top: '46%', transform: 'translate(-50%, -50%)',
+    fontFamily: SERIF, fontStyle: 'italic', fontSize: 'clamp(32px, 5vw, 64px)',
+    color: 'rgba(255,255,255,0.94)', textShadow: '0 2px 18px rgba(0,0,0,0.35)',
+    pointerEvents: 'none', letterSpacing: '0.01em',
   });
-  const circleLabel = document.createElement('span');
-  circleLabel.textContent = 'CIRCLE';
-  const sep = document.createElement('span');
-  sep.textContent = '/';
-  const lineLabel = document.createElement('span');
-  lineLabel.textContent = 'LINE';
-  [circleLabel, sep, lineLabel].forEach((el) => toggleEl.appendChild(el));
-  toggleEl.addEventListener('click', () => setMode(state.mode === 'circle' ? 'line' : 'circle'));
-  root.appendChild(toggleEl);
+  root.appendChild(labelEl);
 
-  document.body.appendChild(root);
+  barEl = document.createElement('div');
+  Object.assign(barEl.style, {
+    position: 'absolute', left: '50%', bottom: '6%', transform: 'translateX(-50%)',
+    display: 'flex', alignItems: 'center', gap: '14px',
+    background: 'rgba(58,54,48,0.55)', backdropFilter: 'blur(6px)',
+    borderRadius: '999px', padding: '8px 18px 8px 8px',
+    fontFamily: SANS, color: '#fff', userSelect: 'none',
+  });
+  root.appendChild(barEl);
+
+  thumbEl = document.createElement('div');
+  Object.assign(thumbEl.style, {
+    width: '38px', height: '38px', borderRadius: '50%', backgroundSize: 'cover',
+    backgroundPosition: 'center', flexShrink: '0',
+  });
+  barEl.appendChild(thumbEl);
+
+  barLabelEl = document.createElement('div');
+  Object.assign(barLabelEl.style, { fontSize: '12px', letterSpacing: '0.16em', fontWeight: '700' });
+  barEl.appendChild(barLabelEl);
+
+  barEl.appendChild(makeArrow('prev'));
+  barEl.appendChild(makeArrow('next'));
+
+  updateLabel(state.rotY);
 }
 
 function syncFrame() {
   const anchor = document.querySelector('.pf-float-wrap');
   if (!anchor) {
-    if (state.visible) {
-      state.visible = false;
-      root.style.display = 'none';
-    }
+    if (state.visible) { state.visible = false; root.style.display = 'none'; }
     return;
   }
   const rect = anchor.getBoundingClientRect();
@@ -265,39 +235,37 @@ function syncFrame() {
   if (!state.visible) {
     state.visible = true;
     root.style.display = 'block';
-    applyTransforms(false);
   }
   root.style.left = rect.left + 'px';
   root.style.top = rect.top + 'px';
   root.style.width = rect.width + 'px';
   root.style.height = rect.height + 'px';
 
-  // Circle mode needs room for the full circle (~2.9x card width across);
-  // line mode just needs 3 cards in a row. Size for the circle case since
-  // it's the default and the tighter constraint.
-  const available = Math.min(rect.width * 0.96, rect.height * 1.0);
-  const targetCardW = Math.round(Math.min(available / 2.0, 560));
-  if (Math.abs(targetCardW - state.cardW) > 4) {
-    state.cardW = targetCardW;
-    state.cardH = Math.round(targetCardW * (2 / 3));
-    cardEls.forEach((card) => {
-      card.style.width = state.cardW + 'px';
-      card.style.height = state.cardH + 'px';
-    });
-    applyTransforms(false);
+  const w = rect.width, h = rect.height;
+  if (canvasEl.__w !== w || canvasEl.__h !== h) {
+    canvasEl.__w = w; canvasEl.__h = h;
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h, false);
   }
 }
 
 function tick() {
-  requestAnimationFrame(tick);
+  raf = requestAnimationFrame(tick);
   syncFrame();
+  if (!state.visible) return;
+
+  const liveRot = state.dragging ? state.rotY + state.dragDelta * 0.0044 : state.rotY;
+  group.rotation.y = liveRot;
+  if (state.dragging) updateLabel(liveRot);
+  renderer.render(scene, camera);
 }
 
 function start() {
   if (built) return;
   built = true;
   buildDom();
-  requestAnimationFrame(tick);
+  raf = requestAnimationFrame(tick);
 }
 
 if (document.readyState === 'loading') {
