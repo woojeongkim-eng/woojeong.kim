@@ -744,14 +744,18 @@ class Component extends DCLogic {
       // directly in the grid instead of being nested behind an extra click.
       const photos = f.media.filter(m => m.type !== 'video');
       const videos = f.media.filter(m => m.type === 'video');
+      const mixed = photos.length > 0 && videos.length > 0;
       const out = [];
-      if (photos.length) out.push({ ...f, media: photos, previewVideoIndex: undefined });
+      if (photos.length) {
+        out.push({ ...f, title: mixed ? f.title + ' · Image' : f.title, media: photos, previewVideoIndex: undefined });
+      }
       videos.forEach((v, vi) => {
-        const needsSuffix = photos.length > 0 || videos.length > 1;
+        const needsSuffix = mixed || videos.length > 1;
+        const suffix = videos.length > 1 ? ' · Clip ' + (vi + 1) : ' · Video';
         out.push({
           ...f,
           id: needsSuffix ? f.id + '-v' + (vi + 1) : f.id,
-          title: videos.length > 1 ? f.title + ' · Clip ' + (vi + 1) : f.title,
+          title: needsSuffix ? f.title + suffix : f.title,
           media: [v],
           previewVideoIndex: undefined,
         });
