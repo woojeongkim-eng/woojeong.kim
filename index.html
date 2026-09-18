@@ -611,6 +611,19 @@ class Component extends DCLogic {
     const enc = (p) => this.state.mediaReady ? encodeURI(p.normalize('NFD')) : undefined;
     const realAiFolders = [
       {
+        id: 'ai-white-tomato-mist',
+        title: 'White Tomato Crème Mist',
+        role: '모델 화보 · AI 티징 제작',
+        company: 'PORTRÉ',
+        mediaType: 'ai',
+        isReal: true,
+        description: 'White Tomato Crème Mist 신제품 출시에 맞춰 모델 화보 이미지를 생성형 AI로 자연스럽게 움직이는 영상으로 구현했습니다.',
+        media: [
+          { type: 'video', src: 'uploads/260903_mist-cushion-tijing-1.mp4' },
+          { type: 'video', src: 'uploads/260910_cd-nim-ai.mp4' },
+        ],
+      },
+      {
         id: 'ai-1',
         title: 'Nail Nouveau Jus',
         previewImage: 'uploads/portre_product-ai.jpg',
@@ -736,6 +749,7 @@ class Component extends DCLogic {
           { type: 'video', src: 'uploads/251002_cuseog-peuromosyeon.mp4' },
           { type: 'video', src: 'uploads/251014_kakaotogseonmulhagi-paekijing.mp4' },
           { type: 'video', src: 'uploads/DakSIXhhgF8.mp4' },
+          { type: 'video', src: 'uploads/260821_sangbangi-gyeolsan-tijing.mp4' },
         ],
       },
       {
@@ -751,7 +765,6 @@ class Component extends DCLogic {
           { type: 'video', src: 'uploads/260724_musinsa-tijing.mp4', poster: 'uploads/260724_musinsa-tijing-poster.jpg' },
           { type: 'video', src: 'uploads/260725_musinsa-tijing.mp4', poster: 'uploads/260725_musinsa-tijing-poster.jpg' },
           { type: 'video', src: 'uploads/260730_cd-nim-musinsa.mp4', poster: 'uploads/260730_cd-nim-musinsa-poster.jpg' },
-          { type: 'video', src: 'uploads/260821_sangbangi-gyeolsan-tijing.mp4' },
           { type: 'image', src: 'uploads/musinsa-x-portre-promotion.jpg' },
         ],
       },
