@@ -738,7 +738,26 @@ class Component extends DCLogic {
           { type: 'video', src: 'uploads/DakSIXhhgF8.mp4' },
         ],
       },
-    ].map(f => ({
+    ].flatMap((f) => {
+      // Photos from a shoot stay bundled in one folder; each video becomes
+      // its own standalone card (like the VIDEO category) so it shows up
+      // directly in the grid instead of being nested behind an extra click.
+      const photos = f.media.filter(m => m.type !== 'video');
+      const videos = f.media.filter(m => m.type === 'video');
+      const out = [];
+      if (photos.length) out.push({ ...f, media: photos, previewVideoIndex: undefined });
+      videos.forEach((v, vi) => {
+        const needsSuffix = photos.length > 0 || videos.length > 1;
+        out.push({
+          ...f,
+          id: needsSuffix ? f.id + '-v' + (vi + 1) : f.id,
+          title: videos.length > 1 ? f.title + ' · Clip ' + (vi + 1) : f.title,
+          media: [v],
+          previewVideoIndex: undefined,
+        });
+      });
+      return out;
+    }).map(f => ({
       ...f,
       count: f.media.length,
       isPlaceholder: false,
