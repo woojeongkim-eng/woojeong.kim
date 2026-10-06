@@ -16,6 +16,9 @@
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; }
     body { -webkit-font-smoothing: antialiased; }
+    /* Korean wraps at word boundaries, not mid-word; overflow-wrap is the fallback for over-long strings */
+    body { word-break: keep-all; overflow-wrap: break-word; }
+    .pf-about-meta-col { text-align: left; }
     @keyframes pf-fade-up {
       from { opacity: 0; transform: translateY(14px); }
       to { opacity: 1; transform: translateY(0); }
@@ -40,6 +43,7 @@
       .pf-big-title { font-size: 28px !important; overflow-wrap: break-word !important; }
       .pf-about-title { font-size: 20px !important; line-height: 1.5 !important; }
       .pf-about-body { font-size: 13px !important; line-height: 1.7 !important; }
+      .pf-about-meta-col { width: 100% !important; max-width: 320px; }
       .pf-career-row { gap: 10px !important; padding: 16px 0 !important; }
       .pf-career-company { font-size: 16px !important; width: auto !important; flex-shrink: 0 !important; }
       .pf-career-role { font-size: 11px !important; }
@@ -159,17 +163,56 @@
   <sc-if value="{{ isProjectDetail }}" hint-placeholder-val="{{ false }}">
     <main key="project-detail" class="pf-page" style="{{ projectDetailPageStyle }}">
       <a href="#" class="pf-social" style="{{ backLinkStyle }}" onClick="{{ closeProjectDetail }}">← BACK TO PROJECT</a>
-      <div style="{{ projectDetailHeroStyle }}">
-        {{ heroImgEl }}
-        <sc-if value="{{ noProjectImages }}" hint-placeholder-val="{{ true }}">
-          <span style="{{ placeholderLabelStyle }}">COVER IMAGE</span>
-        </sc-if>
-      </div>
-      <div style="{{ projectDetailMetaRowStyle }}">
-        <h1 class="pf-big-title" style="{{ projectDetailTitleStyle }}">{{ projectDetail.title }}</h1>
-        <span style="{{ projectDetailTagStyle }}">{{ projectDetail.company }} — {{ projectDetail.role }}</span>
-      </div>
-      <p style="{{ projectDetailBodyStyle }}">{{ projectDetail.description }}</p>
+      <sc-if value="{{ showClassicHero }}" hint-placeholder-val="{{ true }}">
+        <div style="{{ projectDetailHeroStyle }}">
+          {{ heroImgEl }}
+          <sc-if value="{{ noProjectImages }}" hint-placeholder-val="{{ true }}">
+            <span style="{{ placeholderLabelStyle }}">COVER IMAGE</span>
+          </sc-if>
+        </div>
+        <div style="{{ projectDetailMetaRowStyle }}">
+          <h1 class="pf-big-title" style="{{ projectDetailTitleStyle }}">{{ projectDetail.title }}</h1>
+          <span style="{{ projectDetailTagStyle }}">{{ projectDetail.company }} — {{ projectDetail.role }}</span>
+        </div>
+        <p style="{{ projectDetailBodyStyle }}">{{ projectDetail.description }}</p>
+      </sc-if>
+      <sc-if value="{{ hasFacts }}" hint-placeholder-val="{{ false }}">
+        <div style="{{ splitHeroStyle }}">
+          <div style="{{ splitHeroImgStyle }}">{{ heroImgElAuto }}</div>
+          <div style="{{ splitHeroTextStyle }}">
+            <h1 class="pf-big-title" style="{{ projectDetailTitleStyle }}">{{ projectDetail.title }}</h1>
+            <div style="{{ factsRowStyle }}">
+              <sc-for list="{{ factItems }}" as="fa" hint-placeholder-count="3">
+                <div style="{{ factItemStyle }}">
+                  <span style="{{ factLabelStyle }}">{{ fa.label }}</span>
+                  <span style="{{ factValueStyle }}">{{ fa.value }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <sc-if value="{{ hasMetrics }}" hint-placeholder-val="{{ false }}">
+              <div style="{{ metricsRowStyle }}">
+                <sc-for list="{{ metricItems }}" as="m" hint-placeholder-count="4">
+                  <div style="{{ metricItemStyle }}">
+                    <span style="{{ metricValueStyle }}">{{ m.value }}</span>
+                    <span style="{{ metricLabelStyle }}">{{ m.label }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <p style="{{ projectDetailBodyStyle }}">{{ projectDetail.description }}</p>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ hasStory }}" hint-placeholder-val="{{ false }}">
+        <div style="{{ storyListStyle }}">
+          <sc-for list="{{ storyItems }}" as="st" hint-placeholder-count="2">
+            <div style="{{ storyRowStyle }}">
+              <span style="{{ storyLabelStyle }}">{{ st.label }}</span>
+              <span style="{{ storyTextStyle }}">{{ st.text }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
       <sc-if value="{{ hasResults }}" hint-placeholder-val="{{ false }}">
         <span style="{{ resultsLabelStyle }}">RESULT</span>
         <ul style="{{ resultsListStyle }}">
@@ -180,8 +223,13 @@
       </sc-if>
       <div style="{{ projectDetailGridStyle }}">
         <sc-for list="{{ projectGridImages }}" as="gi" hint-placeholder-count="4">
-          <div style="{{ projectDetailImgWrapStyle }}">
-            {{ gi.imgEl }}
+          <div style="{{ projectDetailFigureStyle }}">
+            <div style="{{ projectDetailImgWrapStyle }}">
+              {{ gi.imgEl }}
+            </div>
+            <sc-if value="{{ gi.hasCaption }}" hint-placeholder-val="{{ false }}">
+              <span style="{{ projectDetailCaptionStyle }}">{{ gi.caption }}</span>
+            </sc-if>
           </div>
         </sc-for>
       </div>
@@ -203,22 +251,38 @@
           생성형 AI를 활용한 콘텐츠 제작까지 역량을 확장하고 있습니다.
         </p>
         <div style="{{ aboutMetaRowStyle }}">
-          <div style="{{ aboutMetaColStyle }}">
+          <div class="pf-about-meta-col" style="{{ aboutMetaColStyle }}">
             <div style="{{ aboutMetaDividerStyle }}"></div>
             <span style="{{ aboutMetaLabelStyle }}">NAME</span>
             <span style="{{ aboutMetaValueStyle }}">Kim Woojeong</span>
           </div>
-          <div style="{{ aboutMetaColStyle }}">
+          <div class="pf-about-meta-col" style="{{ aboutMetaColStyle }}">
             <div style="{{ aboutMetaDividerStyle }}"></div>
             <span style="{{ aboutMetaLabelStyle }}">ROLE</span>
-            <span style="{{ aboutMetaValueStyle }}">Marketing &amp; Content</span>
+            <span style="{{ aboutMetaValueStyle }}">Brand &amp; IMC Marketing</span>
           </div>
-          <div style="{{ aboutMetaColStyle }}">
+          <div class="pf-about-meta-col" style="{{ aboutMetaColStyle }}">
             <div style="{{ aboutMetaDividerStyle }}"></div>
             <span style="{{ aboutMetaLabelStyle }}">CONTACT</span>
             <sc-for list="{{ contactRows }}" as="row" hint-placeholder-count="2">
               <a href="{{ row.href }}" class="pf-social" style="{{ aboutMetaLinkStyle }}">{{ row.label }}</a>
             </sc-for>
+          </div>
+        </div>
+        <div style="{{ aboutMetaRowStyle }}">
+          <div class="pf-about-meta-col" style="{{ aboutMetaColStyle }}">
+            <div style="{{ aboutMetaDividerStyle }}"></div>
+            <span style="{{ aboutMetaLabelStyle }}">EDUCATION</span>
+            <span style="{{ aboutMetaValueStyle }}">한국외국어대학교</span>
+            <span style="{{ aboutMetaValueStyle }}">독일어통번역학과 (2015 — 2021)</span>
+          </div>
+          <div class="pf-about-meta-col" style="{{ aboutMetaColStyle }}">
+            <div style="{{ aboutMetaDividerStyle }}"></div>
+            <span style="{{ aboutMetaLabelStyle }}">SKILLS</span>
+            <span style="{{ aboutMetaValueStyle }}">Meta Ads Manager · Google Analytics</span>
+            <span style="{{ aboutMetaValueStyle }}">네이버 광고 · 카카오모먼트</span>
+            <span style="{{ aboutMetaValueStyle }}">Photoshop · Premiere</span>
+            <span style="{{ aboutMetaValueStyle }}">생성형 AI — Kling · Nano Banana · Claude</span>
           </div>
         </div>
       </div>
@@ -433,6 +497,10 @@ class Component extends DCLogic {
           description: it.description || '이 프로젝트의 배경, 목표, 진행 과정을 담는 상세 설명 placeholder입니다. 캠페인 전략, 비주얼 방향, 결과 등을 자유롭게 채워주세요.',
           results: it.results || [],
           images: it.images || [],
+          period: it.period || '',
+          metrics: it.metrics || [],
+          story: it.story || [],
+          captions: it.captions || [],
         },
       }),
     }));
@@ -490,83 +558,205 @@ class Component extends DCLogic {
       {
         title: 'Google Best in Class 선정 \nIMC 캠페인',
         role: 'IMC Campaign · Brand Strategy · PR',
-        description: '브랜드 철학인 \'Find Youtiful\'을 소비자 경험으로 연결하기 위해 TVC, 디지털, SNS, PR을 아우르는 통합 IMC 캠페인을 기획·운영했습니다. \'찾아봐, 너만의 아름다움\'이라는 메시지를 중심으로 브랜드 아이덴티티를 일관되게 전달하고, 온·오프라인 접점을 확장해 브랜드 인지도와 구매 전환을 동시에 높였습니다.',
+        description: 'TVC·디지털·SNS·PR을 아우르는 통합 IMC 캠페인의 기획에 참여하고 운영을 서포트한 프로젝트입니다.',
         results: ['Google Best in Class 사례 선정', '25~34세 타겟 구매전환율 7% 이상 상승', '브랜드 철학 및 캠페인 메시지 확산'],
-        images: ['FIND_YOUTIFUL_1.png', 'FIND_YOUTIFUL_2.png', 'FIND_YOUTIFUL_3.png', 'FIND_YOUTIFUL_4.png'].map(f => 'uploads/' + f),
-        cardImage: 'uploads/FIND_YOUTIFUL_3-33b7a5e9.png',
+        images: ['uploads/project/jsm-imc-collage.jpg'],
+        cardImage: 'uploads/project/jsm-imc-collage.jpg',
+        period: '24.02 ~ 24.08',
+        metrics: [
+          { value: '7%+', label: '25~34세 타겟 구매전환율 상승' },
+          { value: 'Best in Class', label: 'Google 사례 선정' },
+        ],
+        story: [
+          { label: 'GOAL', text: "브랜드 철학 'Find Youtiful'을 소비자 경험으로 연결" },
+          { label: 'ACTION', text: "TVC, 디지털, SNS, PR을 아우르는 통합 IMC 캠페인 기획에 참여하고 운영을 서포트하며, '찾아봐, 너만의 아름다움' 메시지를 중심으로 온·오프라인 접점 확장" },
+        ],
       },
       {
         title: '올리브영 쿠션 1위를 만든 \n바이럴 마케팅',
         role: 'Viral Marketing · Influencer · Content Strategy',
-        description: '올리브영 상반기 최대 프로모션 \'파워팩\'의 매출 극대화와 검색 점유율 확보를 목표로 바이럴 마케팅 전략을 기획했습니다. 초기 화제성 확보와 지속적인 검색 노출을 위해 리딩군·서포터군 이원화 전략을 수립하고, 유튜브·인스타그램·블로그를 활용한 콘텐츠를 운영했습니다.',
-        results: ['바이럴 콘텐츠 132건 배포', '인플루언서 콘텐츠 조회수 2.3만+', '올리브영 쿠션 카테고리 1위 달성', '프로모션 KPI 달성 및 매출 기여'],
-        images: ['baireolmaketing_1.png'].map(f => 'uploads/' + f),
+        description: '올리브영 \'파워팩\' 프로모션의 바이럴 마케팅 전략을 기획·운영한 프로젝트입니다.',
+        results: ['바이럴 콘텐츠 140건 배포', '인플루언서 콘텐츠 평균 조회수 2.3만+', '올리브영 쿠션 카테고리 1위 달성', '프로모션 KPI 달성 및 매출 기여'],
+        images: ['uploads/project/jsm-viral-collage.jpg'],
+        cardImage: 'uploads/project/jsm-viral-collage.jpg',
+        period: '23.01 ~ 24.08',
+        metrics: [
+          { value: '140건', label: '바이럴 콘텐츠 배포' },
+          { value: '2.3만+', label: '인플루언서 콘텐츠 평균 조회수' },
+          { value: '1위', label: '올리브영 쿠션 카테고리' },
+        ],
+        story: [
+          { label: 'GOAL', text: "올리브영 상반기 최대 프로모션 '파워팩'의 매출 극대화와 검색 점유율 확보" },
+          { label: 'ACTION', text: '초기 화제성과 지속적인 검색 노출을 위해 리딩군·서포터군 이원화 전략을 수립하고, 유튜브·인스타그램·블로그 콘텐츠 운영' },
+        ],
       },
       {
         title: 'ROAS 979%를 달성한 \n퍼포먼스 마케팅',
         role: 'Performance Marketing · Meta Ads · Retargeting',
-        description: '프로모션 기간 구매전환을 극대화하기 위해 데이터 기반 퍼포먼스 광고 전략을 운영했습니다. 광고 피로도를 개선하기 위해 소재를 지속적으로 다각화하고, 구매 단계별 리타겟팅 전략을 적용해 광고 효율을 높였습니다.',
+        description: '데이터 기반 퍼포먼스 광고로 프로모션 구매전환을 높인 프로젝트입니다.',
         results: ['ROAS 최대 979% 달성', '월평균 ROAS 406%', '광고 소재 최적화를 통한 지속적인 효율 개선'],
-        images: ['dijiteolgwanggo_1.jpeg', 'dijiteolgwanggo_2.png', 'dijiteolgwanggo_3.png', 'dijiteolgwanggo_4.png'].map(f => 'uploads/' + f),
+        images: ['uploads/project/jsm-performance-ads.jpg'],
+        cardImage: 'uploads/project/jsm-performance-ads.jpg',
+        period: '22.04 ~ 24.08',
+        metrics: [
+          { value: '979%', label: '최대 ROAS' },
+          { value: '406%', label: '월평균 ROAS' },
+        ],
+        story: [
+          { label: 'GOAL', text: '프로모션 기간 구매전환 극대화' },
+          { label: 'ACTION', text: '데이터 기반 퍼포먼스 광고를 운영하며 소재를 지속적으로 다각화하고, 구매 단계별 리타겟팅 적용' },
+        ],
       },
       {
         title: '브랜드 아이덴티티를 구축한 \n콘텐츠 전략',
         role: 'Content Strategy · SNS · Creative',
-        description: '브랜드 아이덴티티를 일관되게 전달하고 2030 고객과의 접점을 확대하기 위해 온드미디어 콘텐츠를 기획·운영했습니다. 브랜드 톤앤매너를 기반으로 콘텐츠와 비주얼을 기획하며 브랜드 경험을 강화했습니다.',
+        description: '온드미디어 콘텐츠로 브랜드 아이덴티티를 구축한 프로젝트입니다.',
         results: ['브랜드 아이덴티티 강화', '콘텐츠 참여도 및 인게이지먼트 향상', '신제품 커뮤니케이션 강화'],
-        images: ['ondeumidieo_1.png', 'ondeumidieo_2.png', 'ondeumidieo_3.png'].map(f => 'uploads/' + f),
+        images: ['uploads/ondeumidieo_3.png'],
+        cardImage: 'uploads/ondeumidieo_3.png',
+        period: '22.04 ~ 24.08',
+        story: [
+          { label: 'GOAL', text: '브랜드 아이덴티티를 일관되게 전달하고 2030 고객과의 접점 확대' },
+          { label: 'ACTION', text: '브랜드 톤앤매너를 기반으로 온드미디어 콘텐츠와 비주얼을 기획·운영' },
+        ],
       },
       {
         title: '브랜드 경험을 확장한 \n전시 프로젝트',
         role: 'Brand Experience · Exhibition · PR',
-        description: '플래그십 스토어를 브랜드 경험 공간으로 확장하기 위해 시즌별 전시 프로젝트를 기획·운영했습니다. 전시와 체험 프로그램을 통해 브랜드 철학을 공간 경험으로 전달하고 고객 접점을 확대했습니다.',
+        description: '플래그십 스토어에서 시즌별 전시 프로젝트를 기획·운영한 프로젝트입니다.',
         results: ['시즌 5~8 전시 운영', '언론 홍보를 통한 브랜드 노출 확대', 'SNS 이벤트 및 클래스 운영으로 고객 참여 확대'],
-        images: ['peulrobseuinateu_1.jpeg', 'peulrobseuinateu_2.png', 'peulrobseuinateu_3.png', 'peulrobseuinateu_4.png', 'peulrobseuinateu_5.png', 'peulrobseuinateu_6.png'].map(f => 'uploads/' + f),
-        cardImage: 'uploads/peulrobseuinateu_5-66fd2f0d.png',
+        images: ['uploads/project/jsm-exhibition-collage.jpg'],
+        cardImage: 'uploads/project/jsm-exhibition-collage.jpg',
+        period: '23.05 ~ 24.08',
+        metrics: [
+          { value: '시즌 5~8', label: '전시 운영' },
+        ],
+        story: [
+          { label: 'GOAL', text: '플래그십 스토어를 브랜드 경험 공간으로 확장' },
+          { label: 'ACTION', text: '시즌별 전시 프로젝트를 기획·운영하고, 전시와 체험 프로그램으로 브랜드 철학을 공간 경험으로 전달' },
+        ],
       },
     ];
     const portreRaw = [
       {
         title: '데이터 기반 성장을 이끈 \n퍼포먼스 마케팅',
         role: 'Performance Marketing · Meta Ads · Digital Strategy',
-        description: '브랜드 초기 성장 단계에서 퍼포먼스 마케팅을 중심으로 브랜드 인지도와 매출을 동시에 확대했습니다. Meta, 네이버 브랜드검색, 카카오 등 주요 디지털 채널을 운영하며 캠페인별 광고 전략을 수립하고, 데이터 기반 최적화를 통해 광고 효율을 지속적으로 개선했습니다.',
+        description: '데이터 기반 퍼포먼스 마케팅으로 브랜드 초기 성장을 이끈 프로젝트입니다.',
         results: ['평균 ROAS 505% 달성', '최고 ROAS 1,058% 달성', '월 평균 노출 96만+ · 클릭 1.7만+', '브랜드검색 키워드 14개 → 33개 확대'],
+        cardImage: 'uploads/project/performance-marketing-collage.jpg',
+        images: ['uploads/project/performance-marketing-collage.jpg'],
+        period: '24.09 ~ 현재',
+        metrics: [
+          { value: '505%', label: '평균 ROAS' },
+          { value: '1,058%', label: '최고 ROAS' },
+          { value: '96만+', label: '월 평균 노출' },
+          { value: '14 → 33', label: '브랜드검색 키워드 (개)' },
+        ],
+        story: [
+          { label: 'GOAL', text: '브랜드 초기 성장 단계에서 브랜드 인지도와 매출을 동시에 확대' },
+          { label: 'ACTION', text: 'Meta, 네이버 브랜드검색, 카카오 등 주요 디지털 채널을 운영하며 캠페인별 광고 전략을 수립하고, 데이터 기반 최적화로 광고 효율을 지속 개선' },
+        ],
       },
       {
         title: '브랜드 비주얼을 완성한 \n콘텐츠 제작',
         role: 'Creative Direction · Content Production · Visual Branding',
-        description: '브랜드 아이덴티티를 일관되게 전달하기 위해 시즌 캠페인과 신제품 중심의 비주얼 콘텐츠를 기획·제작했습니다. 촬영 기획부터 디렉팅, 영상 편집, 상세페이지 제작까지 전 과정을 운영하며 브랜드의 톤앤매너를 구축하고 콘텐츠 품질을 강화했습니다.',
-        results: ['월 2회 이상 브랜드 촬영 운영', '시즌별 캠페인 및 신제품 콘텐츠 제작', '숏폼 콘텐츠 지속 제작 및 운영', '브랜드 비주얼 일관성 강화'],
+        description: '시즌 캠페인과 신제품 중심의 비주얼 콘텐츠를 촬영 기획부터 상세페이지 제작까지 전 과정 운영하고, 이 콘텐츠로 브랜드 SNS를 성장시킨 프로젝트입니다.',
+        results: ['자체 제작 콘텐츠 기반 SNS 운영으로 브랜드 팔로워 1.7만 → 3.7만 성장', '콘텐츠 평균 도달 70만+ 기록', '월 2회 이미지·영상 제작', '시즌별 캠페인·신제품 콘텐츠 및 숏폼 지속 운영'],
+        images: ['uploads/project/content-production-collage.jpg'],
+        cardImage: 'uploads/project/content-production-collage.jpg',
+        period: '24.09 ~ 현재',
+        metrics: [
+          { value: '1.7만 → 3.7만', label: '브랜드 SNS 팔로워' },
+          { value: '70만+', label: '콘텐츠 평균 도달' },
+          { value: '월 2회', label: '이미지·영상 제작' },
+        ],
+        story: [
+          { label: 'GOAL', text: '브랜드 아이덴티티를 일관되게 전달하고 SNS 채널 성장' },
+          { label: 'ACTION', text: '촬영 기획, 디렉팅, 영상 편집, 상세페이지 제작까지 전 과정을 운영하며 브랜드 톤앤매너를 구축하고, 제작한 콘텐츠로 브랜드 SNS 채널 운영' },
+        ],
       },
       {
         title: '생성형 AI를 활용한 \n비주얼 콘텐츠 제작',
         role: 'Generative AI · Creative Production · Workflow Innovation',
-        description: '생성형 AI를 활용해 이미지와 영상 콘텐츠 제작 프로세스를 구축했습니다. 브랜드 무드를 유지하면서도 다양한 크리에이티브를 빠르게 제작할 수 있는 제작 환경을 마련해 콘텐츠 생산성과 운영 효율을 높였습니다.',
-        results: ['생성형 AI 콘텐츠 12건 이상 제작', '제작 리드타임 단축', '다양한 크리에이티브 제작 방식 확보', '콘텐츠 제작 효율 향상'],
+        description: '생성형 AI로 이미지·영상 콘텐츠 제작 프로세스를 구축한 프로젝트입니다.',
+        results: ['생성형 AI 콘텐츠 15건 이상 제작', '제작 리드타임 단축', '다양한 크리에이티브 제작 방식 확보', '콘텐츠 제작 효율 향상'],
+        images: ['uploads/project/ai-content-production-collage.jpg'],
+        cardImage: 'uploads/project/ai-content-production-collage.jpg',
+        period: '25.03 ~ 현재',
+        metrics: [
+          { value: '15건+', label: '생성형 AI 콘텐츠 제작' },
+          { value: '이미지·영상', label: '제작 범위' },
+        ],
+        story: [
+          { label: 'GOAL', text: '브랜드 무드를 유지하면서 다양한 크리에이티브를 빠르게 제작' },
+          { label: 'ACTION', text: '생성형 AI 기반 이미지·영상 콘텐츠 제작 프로세스를 구축해 제작 리드타임 단축' },
+        ],
       },
       {
         title: '브랜드 성장을 이끈 \n인플루언서 바이럴 마케팅',
         role: 'Influencer Marketing · Seeding · Creator Campaign',
-        description: '브랜드 인지도 확대와 자연스러운 소비자 콘텐츠 확산을 위해 무가·유가 인플루언서를 아우르는 바이럴 마케팅 체계를 구축했습니다. 제품 런칭 일정에 맞춰 크리에이터를 발굴하고 콘텐츠 방향성을 기획하며 지속적인 바이럴 생태계를 운영했습니다.',
+        description: '무가·유가 인플루언서를 아우르는 바이럴 마케팅 체계를 구축한 프로젝트입니다.',
         results: ['무가 바이럴 66건 → 120건 확대', '유가 캠페인 2건 → 80건 이상 운영', '연간 200건 이상 바이럴 콘텐츠 운영', '제품 런칭별 시딩 프로세스 구축'],
+        images: ['uploads/project/viral-marketing-02.jpg'],
+        cardImage: 'uploads/project/viral-marketing-02.jpg',
+        period: '24.09 ~ 현재',
+        metrics: [
+          { value: '66 → 120건', label: '무가 바이럴' },
+          { value: '2 → 80건+', label: '유가 캠페인' },
+          { value: '200건+', label: '연간 바이럴 콘텐츠 운영' },
+        ],
+        story: [
+          { label: 'GOAL', text: '브랜드 인지도 확대와 자연스러운 소비자 콘텐츠 확산' },
+          { label: 'ACTION', text: '제품 런칭 일정에 맞춰 크리에이터를 발굴하고 콘텐츠 방향성을 기획하며 지속적인 바이럴 생태계 운영' },
+        ],
       },
       {
         title: '브랜드 팬덤을 만든 \n서포터즈 프로그램 운영',
         role: 'Community Building · CRM · User Generated Content',
-        description: '브랜드 충성 고객을 확보하기 위해 공식 서포터즈 PORTR8IGHT 프로그램을 기획·운영했습니다. 제품 체험을 넘어 브랜드 철학을 경험하는 커뮤니티를 구축하고, 지속적인 UGC를 생산하며 브랜드 팬덤 형성에 기여했습니다.',
-        results: ['PORTR8IGHT 1기 운영', '미션 콘텐츠 189건 이상 생성', '브랜드 UGC 지속 확보', '고객 커뮤니티 운영 체계 구축'],
+        description: '공식 서포터즈 PORTR8IGHT를 기획·운영해 브랜드 팬덤을 만든 프로젝트입니다.',
+        results: ['PORTR8IGHT 2기까지 운영', '미션 콘텐츠 300건 이상 생성', '서포터즈 50명 운영', '고객 커뮤니티 운영 체계 구축'],
+        images: ['uploads/project/supporters-collage.jpg'],
+        cardImage: 'uploads/project/supporters-collage.jpg',
+        period: '25.04 ~ 현재',
+        metrics: [
+          { value: '2기', label: 'PORTR8IGHT 운영' },
+          { value: '300건+', label: '미션 콘텐츠 생성' },
+          { value: '50명', label: '서포터즈 운영' },
+        ],
+        story: [
+          { label: 'GOAL', text: '브랜드 충성 고객 확보' },
+          { label: 'ACTION', text: '제품 체험을 넘어 브랜드 철학을 경험하는 커뮤니티를 구축하고 지속적인 UGC 생산' },
+        ],
       },
       {
         title: '신제품 런칭 성과를 만든 \nIMC 캠페인',
         role: 'Launch Marketing · IMC · Promotion',
-        description: '쿠션, 파우더팩트, 핸드크림, 네일 등 주요 신제품 런칭 시 디지털 광고, SNS, 바이럴, 프로모션을 통합 운영했습니다. 제품별 USP를 기반으로 콘텐츠와 광고 전략을 기획해 런칭 초기 인지도와 구매 전환을 확보했습니다.',
-        results: ['연간 주요 신제품 런칭 캠페인 운영', '카카오쇼핑라이브 매출 6천만 원 달성', '메이크업 카테고리 1위 유지 기여', '온·오프라인 프로모션 통합 운영'],
+        description: '주요 신제품 런칭을 디지털 광고·SNS·바이럴·프로모션으로 통합 운영한 프로젝트입니다.',
+        results: ['연간 주요 신제품 런칭 캠페인 운영', '카카오쇼핑라이브 매출 6천만 원 달성', '올리브영 메이크업 카테고리 1위 유지 기여', '온·오프라인 프로모션 통합 운영'],
+        images: ['uploads/project/campaign-collage.jpg'],
+        cardImage: 'uploads/project/campaign-collage.jpg',
+        period: '24.09 ~ 현재',
+        metrics: [
+          { value: '6천만 원', label: '카카오쇼핑라이브 매출' },
+          { value: '1위', label: '올리브영 메이크업 카테고리' },
+        ],
+        story: [
+          { label: 'GOAL', text: '신제품 런칭 초기 인지도와 구매 전환 확보' },
+          { label: 'ACTION', text: '쿠션·파우더팩트·핸드크림·네일 등 신제품 런칭 시 제품별 USP 기반으로 콘텐츠와 광고 전략을 기획해 온·오프라인 통합 운영' },
+        ],
       },
       {
-        title: '오프라인 브랜드 경험을 확장한 \n팝업 프로젝트',
-        role: 'Offline Marketing · Event · Brand Experience',
-        description: '뷰티컬리 페스타 오프라인 부스를 기획·운영하며 온라인에서 형성된 브랜드 경험을 오프라인으로 확장했습니다. 공간 구성부터 현장 운영, 콘텐츠 연계까지 전 과정을 담당하며 고객 접점을 확대하고 브랜드 경험을 강화했습니다.',
-        results: ['뷰티컬리 페스타 부스 운영', '브랜드 체험 고객 접점 확대', '오프라인·온라인 연계 콘텐츠 운영', '브랜드 경험 강화'],
+        title: '오프라인 브랜드 경험을 확장한 \n팝업 & 단독 매장',
+        role: 'Offline Marketing · Retail Launch · Brand Experience',
+        description: 'DDP 컬리뷰티페스타 팝업 부스와 성수 단독 매장 The Atelier 오픈으로 오프라인 브랜드 경험을 확장한 프로젝트입니다.',
+        results: ['DDP 컬리뷰티페스타 팝업 부스 운영 (25.10.30 – 11.02)', '성수 단독 매장 The Atelier 오픈 (26.05)', '미디어 데이 기반 오픈 마케팅 및 콘텐츠 제작', '체험 미션·럭키드로우·구매 인증 등 온·오프라인 연계 혜택 운영'],
+        images: ['uploads/project/popup-collage.jpg'],
+        cardImage: 'uploads/project/popup-collage.jpg',
+        period: '25.10 ~ 현재',
+        story: [
+          { label: 'GOAL', text: '온라인에서 형성된 브랜드 경험을 오프라인 공간으로 확장' },
+          { label: 'ACTION', text: '컬리뷰티페스타 부스에서 신제품 체험 미션·럭키드로우·온라인 구매 인증 혜택을 기획·운영하고, 성수 단독 매장 The Atelier 오픈에 맞춰 미디어 데이를 통한 오픈 마케팅과 콘텐츠 제작 진행' },
+        ],
       },
     ];
 
@@ -849,6 +1039,7 @@ class Component extends DCLogic {
     }));
 
     const videoClipFiles = [
+      'DdlTycVBeyr.mp4', 'DdDyF5fud18.mp4', 'Dc-IrcOu23l.mp4', 'Dc26D2rRJNX.mp4', 'DdYsj06zF22.mp4',
       'DahmIqLMI_T.mp4', 'DacfMqtPwaM.mp4', 'DaSJBXSgPLp.mp4', 'DYWl80xN_Oc.mp4', 'DX8egI6RArp.mp4',
       'DX0sLGqv9Cf.mp4', 'DXYro0LD6wX.mp4', 'DW8YiZeDvXj.mp4', 'DWGXBGPjD-e.mp4', 'DUh9qvAjJkx.mp4',
       'DUIQYCPl37s.mp4', 'DT2GGQ4kWkN.mp4', 'DTfAdNBl-nh.mp4',
@@ -872,6 +1063,40 @@ class Component extends DCLogic {
     }));
 
     const photoRealFolders = [
+      {
+        id: 'photo-22',
+        title: 'Daily Wear Mesh Cushion',
+        role: 'Concept: Daily, Lightweight, Natural Finish',
+        company: 'PORTRÉ',
+        mediaType: 'photo',
+        isReal: true,
+        description: 'Daily, Lightweight, Natural Finish 컨셉으로 진행한 Daily Wear Mesh Cushion 화보입니다.',
+        media: [
+          'portre_3014.jpg', 'portre_3020.jpg', 'portre_3046.jpg', 'portre_3049.jpg', 'portre_3056.jpg',
+          'portre_3114-1.jpg', 'portre_3119-1.jpg', 'portre_3135-1.jpg', 'portre_3168.jpg', 'portre_3179.jpg',
+          'portre_3189.jpg', 'portre_3209-1.jpg', 'portre_3222.jpg', 'portre_3231.jpg', 'portre_3281.jpg', 'portre_6502.jpg',
+        ].map(fname => ({ type: 'image', src: 'uploads/daily wear mesh cushion/' + fname })),
+      },
+      {
+        id: 'photo-23',
+        title: 'White Tomato Crème Mist',
+        role: 'Concept: Fresh, Hydrating, Everyday Ritual',
+        company: 'PORTRÉ',
+        mediaType: 'photo',
+        isReal: true,
+        description: 'Fresh, Hydrating, Everyday Ritual 컨셉으로 진행한 White Tomato Crème Mist 화보입니다.',
+        media: [
+          'white-tomato-mist-bottle-tomatoes.jpg',
+          'portre_0469.jpg', 'portre_0477.jpg', 'portre_0488.jpg', 'portre_0494.jpg', 'portre_0507.jpg',
+          'portre_0521.jpg', 'portre_0533.jpg', 'portre_0540.jpg', 'portre_0543.jpg', 'portre_0580.jpg',
+          'portre_0580_1.jpg', 'portre_0595.jpg', 'portre_0632.jpg', 'portre_0635.jpg', 'portre_0636.jpg',
+          'portre_239.jpg', 'portre_2329.jpg', 'portre_2337.jpg', 'portre_2342.jpg', 'portre_2379_1.jpg',
+          'portre_2388_1.jpg', 'portre_2399-1.jpg', 'portre_2403-1.jpg', 'portre_2411.jpg', 'portre_2433-1.jpg',
+          'portre_2447.jpg', 'portre_2460.jpg', 'portre_2481.jpg', 'portre_2481-1.jpg', 'portre_2486-1.jpg',
+          'portre_2547-1.jpg', 'portre_2576-1.jpg', 'portre_2686-1.jpg', 'portre_2721.jpg', 'portre_2777-1.jpg',
+          'portre_2777-2.jpg', 'portre_2803-1.jpg', 'portre_2960-1.jpg', 'portre_2960-2.jpg',
+        ].map(fname => ({ type: 'image', src: 'uploads/white tomato creme mist/' + fname })),
+      },
       {
         id: 'photo-1',
         title: 'Nail Nouveau Jus - Summer Edition',
@@ -1068,6 +1293,10 @@ class Component extends DCLogic {
         isReal: true,
         description: '발렌타인, 추석, 홀리데이 등 시즌 및 프로모션별로 연출한 화보입니다.',
         media: [
+          'portre_0904.jpg', 'portre_0906.jpg', 'portre_0924.jpg', 'portre_0940.jpg', 'portre_096.jpg',
+          'portre_0972.jpg', 'portre_0984.jpg', 'portre_0990.jpg', 'portre_0995.jpg', 'portre_1004.jpg',
+          'portre_1042.jpg', 'portre_1056.jpg', 'portre_1079-2.jpg', 'portre_1103.jpg', 'portre_1120.jpg',
+          'portre_1130.jpg', 'portre_1148.jpg', 'portre_1150.jpg',
           'portre_0565r.jpg', 'portre_0408.jpg', 'portre_0619r.jpg', 'portre_0360.jpg', 'portre_1345.jpg',
           'portre_1369.jpg', 'portre_1391.jpg', 'portre_15203.jpg', 'portre_15227.jpg', 'portre_2226.jpg',
           'portre_2237.jpg', 'portre_2289.jpg', 'portre_2354.jpg', 'portre_2376.jpg', 'portre_2495.jpeg',
@@ -1124,6 +1353,30 @@ class Component extends DCLogic {
     }));
 
     const realModelFolders = [
+      {
+        id: 'model-15',
+        title: 'Daily Wear Mesh Cushion',
+        role: 'Model Visual',
+        company: 'PORTRÉ',
+        mediaType: 'model',
+        isReal: true,
+        previewImage: 'uploads/model/daily-wear-mesh-cushion-01.jpg',
+        description: 'Daily Wear Mesh Cushion 모델 화보입니다.',
+        media: ['daily-wear-mesh-cushion-01.jpg', 'daily-wear-mesh-cushion-02.jpg', 'daily-wear-mesh-cushion-03.jpg', 'daily-wear-mesh-cushion-04.jpg']
+          .map(fname => ({ type: 'image', src: 'uploads/model/' + fname })),
+      },
+      {
+        id: 'model-16',
+        title: 'White Tomato Crème Mist',
+        role: 'Model Visual',
+        company: 'PORTRÉ',
+        mediaType: 'model',
+        isReal: true,
+        previewImage: 'uploads/model/white-tomato-creme-mist-01.jpg',
+        description: 'White Tomato Crème Mist 모델 화보입니다.',
+        media: ['white-tomato-creme-mist-01.jpg', 'white-tomato-creme-mist-02.jpg', 'white-tomato-creme-mist-03.jpg', 'white-tomato-creme-mist-04.jpg', 'white-tomato-creme-mist-05.jpg', 'white-tomato-creme-mist-06.jpg', 'white-tomato-creme-mist-07.jpg']
+          .map(fname => ({ type: 'image', src: 'uploads/model/' + fname })),
+      },
       {
         id: 'model-7',
         title: 'Soft Filter Powder Pact',
@@ -1403,7 +1656,7 @@ class Component extends DCLogic {
             '신제품 론칭 마케팅 전략 수립 및 운영',
             'SNS 채널 운영 전략 및 커뮤니케이션 전략 수립',
             '연간 브랜딩 캠페인 기획 및 운영 서포트',
-            '통합 캠페인 IMC 마케팅 기획 및 운영(TVC·옥외광고·버스광고·SNS·디지털·PR 통합) \n — 25–34 타겟 구매전환 7%↑, 업계 Best in Class 사례 선정',
+            '통합 캠페인 IMC 마케팅 기획 참여 및 운영 서포트(TVC·옥외광고·버스광고·SNS·디지털·PR 통합) \n — 25–34 타겟 구매전환 7%↑, 업계 Best in Class 사례 선정',
           ],
         },
         {
@@ -1418,7 +1671,7 @@ class Component extends DCLogic {
           items: [
             '채널 퍼포먼스 광고 기획 및 운영(인스타그램, 유튜브 등)',
             '소재 다각화 및 목적별(트래픽/구매전환/리타겟팅) 채널 분배 전략 수립, 구매자 데이터 기반 리타겟팅 광고 집행 — 월평균 ROAS 406%, 최대 979% 달성',
-            '인플루언서 협업 기반 바이럴 마케팅 캠페인 진행(리딩군/서포터군 이원화 전략) — 콘텐츠 140건 배포, 조회수 2.3만 회 이상 달성, 카테고리 1위 기여',
+            '인플루언서 협업 기반 바이럴 마케팅 캠페인 진행(리딩군/서포터군 이원화 전략) — 콘텐츠 140건 배포, 평균 조회수 2.3만 회 이상 달성, 카테고리 1위 기여',
             '제휴 플랫폼 체험단 운영(화해, 글로우픽, 파우더룸 등)',
           ],
         },
@@ -1453,6 +1706,7 @@ class Component extends DCLogic {
           items: [
             '브랜드 마케팅 전략 및 신제품 론칭 캠페인 기획·운영',
             'SNS 채널 운영 및 커뮤니케이션 전략 수립',
+            'DDP 컬리뷰티페스타 팝업 부스 및 성수 단독 매장 The Atelier 오픈 마케팅(미디어 데이·콘텐츠 제작) 기획·운영',
           ],
         },
         {
@@ -1462,26 +1716,35 @@ class Component extends DCLogic {
             'SS/FW 화보 및 제품 비주얼 디렉팅',
             '월 2회 제품 촬영 기획 및 디렉팅',
             '숏폼 콘텐츠 기획·촬영·편집',
-            '생성형 AI를 활용한 이미지·영상 콘텐츠 제작',
+            '상세페이지 기획 및 제작',
+            '생성형 AI를 활용한 이미지·영상 콘텐츠 제작 프로세스 구축 — 15건 이상 제작, 제작 리드타임 단축',
             '콘텐츠 평균 도달 70만+ 기록, 브랜드 SNS 팔로워 1.7만 → 3.7만 성장',
           ],
         },
         {
           title: '3. 퍼포먼스 마케팅',
           items: [
-            'Meta, 네이버 브랜드검색 등 퍼포먼스 광고 기획 및 운영',
+            'Meta, 네이버 브랜드검색, 카카오 등 퍼포먼스 광고 기획 및 운영',
+            '브랜드검색 키워드 확장 (14개 → 33개)',
             '목표(트래픽·구매전환·리타겟팅) 기반 채널 운영 전략 수립',
-            '소재 A/B 테스트 및 광고 최적화 — 광고 ROAS 최대 1,000%+ 달성',
+            '소재 A/B 테스트 및 광고 최적화 — 평균 ROAS 505%, 최고 ROAS 1,058% 달성',
           ],
         },
         {
           title: '4. 바이럴·PR',
           items: [
-            '인플루언서 캠페인 기획 및 운영',
+            '무가·유가 인플루언서 이원화 체계 구축 및 운영 — 무가 바이럴 66건 → 120건, 유가 캠페인 2건 → 80건 이상 (연간 200건 이상)',
             '체험단 운영 및 협업 관리',
             '프레스킷 기획·제작',
             '제품 협찬 및 VIP 커뮤니케이션',
             '보도자료 작성 및 PR 운영',
+          ],
+        },
+        {
+          title: '5. 커뮤니티 & 커머스',
+          items: [
+            '공식 서포터즈 PORTR8IGHT 기획·운영(2기) — 서포터즈 50명, 미션 콘텐츠 300건 이상 생성',
+            '카카오쇼핑라이브 상품 구성·프로모션 메시지 기획 및 방송 전후 SNS 연계 — 매출 6천만 원 달성',
           ],
         },
       ],
@@ -1680,8 +1943,28 @@ class Component extends DCLogic {
         : []
       ).map((src, i) => {
         const s = src ? enc(src) : null;
-        return { id: 'pdi-' + i, imgEl: (typeof s === 'string') ? React.createElement('img', { src: s, alt: '', style: { width: '100%', height: '100%', objectFit: 'cover', display: 'block' } }) : null };
+        const caps = (this.state.projectDetail && this.state.projectDetail.captions) || [];
+        const caption = caps[i + 1] || '';
+        return { id: 'pdi-' + i, caption, hasCaption: !!caption, imgEl: (typeof s === 'string') ? React.createElement('img', { src: s, alt: caption, style: { width: '100%', height: '100%', objectFit: 'cover', display: 'block' } }) : null };
       }),
+      heroImgElAuto: (() => {
+        const raw = this.state.projectDetail && this.state.projectDetail.images && this.state.projectDetail.images[0];
+        const s = raw ? enc(raw) : null;
+        return (typeof s === 'string') ? React.createElement('img', { src: s, alt: '', style: { width: '100%', height: 'auto', display: 'block' } }) : null;
+      })(),
+      hasMetrics: !!(this.state.projectDetail && this.state.projectDetail.metrics && this.state.projectDetail.metrics.length),
+      metricItems: (this.state.projectDetail && this.state.projectDetail.metrics) || [],
+      hasStory: !!(this.state.projectDetail && this.state.projectDetail.story && this.state.projectDetail.story.length),
+      storyItems: (this.state.projectDetail && this.state.projectDetail.story) || [],
+      hasFacts: !!(this.state.projectDetail && (this.state.projectDetail.period || (this.state.projectDetail.metrics && this.state.projectDetail.metrics.length))),
+      showClassicHero: !(this.state.projectDetail && (this.state.projectDetail.period || (this.state.projectDetail.metrics && this.state.projectDetail.metrics.length))),
+      factItems: (() => {
+        const pd = this.state.projectDetail;
+        if (!pd) return [];
+        const items = [{ label: 'COMPANY', value: pd.company }, { label: 'FIELD', value: pd.role }];
+        if (pd.period) items.splice(1, 0, { label: 'PERIOD', value: pd.period });
+        return items;
+      })(),
       closeProjectDetail: () => this.setState({ projectDetail: null }),
 
       activeTabProjects: activeTabCompany.projects.map(p => {
@@ -1697,7 +1980,7 @@ class Component extends DCLogic {
       tabRowStyle: { display: 'flex', gap: '28px' },
       scrollRowStyle: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '32px 24px' },
       cardStyle: { flex: '0 0 260px', display: 'flex', flexDirection: 'column', gap: '14px', cursor: 'pointer' },
-      cardImgStyle: { width: '260px', aspectRatio: '4/5', backgroundColor: 'oklch(93% 0.006 60)' },
+      cardImgStyle: { width: '260px', height: '325px', overflow: 'hidden', backgroundColor: 'oklch(93% 0.006 60)' },
       cardCaptionStyle: { display: 'flex', flexDirection: 'column', gap: '3px' },
       cardNumStyle: { fontFamily: sans, fontSize: '11px', color: faintInk, letterSpacing: '0.08em' },
       cardTitleStyle: { fontFamily: serif, fontSize: '18px', color: ink, lineHeight: 1.35, whiteSpace: 'pre-line' },
@@ -2028,6 +2311,23 @@ class Component extends DCLogic {
       resultsLabelStyle: { fontFamily: sans, fontSize: '12px', letterSpacing: '0.14em', color: faintInk, marginTop: '28px', display: 'block' },
       resultsListStyle: { display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px', marginBottom: 0, paddingLeft: '18px', maxWidth: '640px' },
       resultItemStyle: { fontFamily: sans, fontSize: '14px', lineHeight: 1.6, color: ink },
+      factsRowStyle: { display: 'flex', flexWrap: 'wrap', gap: '12px 36px', padding: '18px 0', marginTop: '20px', borderTop: '1px solid oklch(88% 0.006 60 / 0.7)', borderBottom: '1px solid oklch(88% 0.006 60 / 0.7)' },
+      factItemStyle: { display: 'flex', flexDirection: 'column', gap: '4px' },
+      factLabelStyle: { fontFamily: sans, fontSize: '11px', letterSpacing: '0.14em', color: faintInk },
+      factValueStyle: { fontFamily: sans, fontSize: '13px', color: ink, letterSpacing: '0.02em' },
+      metricsRowStyle: { display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '26px 20px', margin: '28px 0' },
+      splitHeroStyle: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '48px', alignItems: 'start', marginBottom: '8px' },
+      splitHeroImgStyle: { width: '100%', backgroundColor: 'oklch(93% 0.006 60)' },
+      splitHeroTextStyle: { display: 'flex', flexDirection: 'column', minWidth: 0 },
+      metricItemStyle: { display: 'flex', flexDirection: 'column', gap: '6px' },
+      metricValueStyle: { fontFamily: serif, fontStyle: 'italic', fontSize: '40px', lineHeight: 1.05, color: ink },
+      metricLabelStyle: { fontFamily: sans, fontSize: '12px', lineHeight: 1.5, color: mutedInk, letterSpacing: '0.04em' },
+      storyListStyle: { display: 'flex', flexDirection: 'column', gap: '18px', marginTop: '28px', maxWidth: '720px' },
+      storyRowStyle: { display: 'grid', gridTemplateColumns: '96px 1fr', gap: '16px', alignItems: 'baseline' },
+      storyLabelStyle: { fontFamily: sans, fontSize: '11px', letterSpacing: '0.14em', color: faintInk },
+      storyTextStyle: { fontFamily: sans, fontSize: '14px', lineHeight: 1.8, color: ink },
+      projectDetailFigureStyle: { display: 'flex', flexDirection: 'column', gap: '8px' },
+      projectDetailCaptionStyle: { fontFamily: sans, fontSize: '12px', lineHeight: 1.5, color: mutedInk },
       projectDetailGridStyle: {
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
